@@ -1,0 +1,40 @@
+services:
+  habbo-database:
+    image: mariadb
+    container_name: habbo-database
+    environment:
+      MARIADB_ROOT_PASSWORD: pass
+      MARIADB_DATABASE: havana
+      MARIADB_USER: havana
+      MARIADB_PASSWORD: havana
+    ports:
+      - "3306:3306" # Expose MySQL on port 3306
+    volumes:
+      - ./database:/docker-entrypoint-initdb.d
+      - mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  habbo-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: habbo-server
+    ports:
+      - "80:80" # Map port 80 on the host to port 80 in the container
+    depends_on:
+      habbo-database:
+        condition: service_healthy
+    environment:
+      HABBO_MYSQL_HOST: "habbo-database"
+      HABBO_MYSQL_PORT: "3306"
+      HABBO_MYSQL_USERNAME: "havana"
+      HABBO_MYSQL_PASSWORD: "havana"
+      HABBO_MYSQL_DATABASE: "havana"
+
+volumes:
+  mariadb_data:
