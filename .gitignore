@@ -1,0 +1,5 @@
+files/www/**
+
+/.idea/
+.vscode
+.DS_Store
