@@ -21,8 +21,8 @@ services:
 
   habbo-server:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../../..
+      dockerfile: ../../../Dockerfile
     container_name: habbo-server
     ports:
       - "80:80" # Map port 80 on the host to port 80 in the container

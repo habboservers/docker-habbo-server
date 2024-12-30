@@ -18,14 +18,8 @@ HABBO_SERVER_LOG_RECEIVED_PACKETS=${HABBO_SERVER_LOG_RECEIVED_PACKETS:-false}
 HABBO_SERVER_LOG_SENT_PACKETS=${HABBO_SERVER_LOG_SENT_PACKETS:-false}
 HABBO_SERVER_DEBUG=${HABBO_SERVER_DEBUG:-false}
 
-# Fail if HABBO_MYSQL_PASSWORD is set to the default value 'changeme'
-if [ "$HABBO_MYSQL_PASSWORD" = "changeme" ]; then
-  echo "[level:ERROR][docker-habbo-server] Error: HABBO_MYSQL_PASSWORD is set to the default value 'changeme'. Please set a secure password."
-  exit 1
-fi
-
 # Generate the .ini file directly
-cat <<EOF > /data/server.ini
+cat <<EOF > /tmp/server.ini
 [Global]
 server.bind = $HABBO_SERVER_IP_BIND
 server.port = $HABBO_SERVER_PORT
