@@ -14,7 +14,7 @@ RUN wget -qO havana.zip https://github.com/Quackster/Havana/releases/download/re
 # Download the www files
 RUN mkdir ./tools/www && \
     wget -qO www.zip https://cdn.habboservers.vasconcellos.tech/build/havana/v1.2/www.zip && \
-    unzip www.zip -d ./tools/www
+    unzip www.zip -d ./tools
 
 # Copy and create the config files
 COPY /havana/files/log4j.properties .
@@ -37,7 +37,6 @@ STOPSIGNAL SIGTERM
 # Commons
 COPY --from=builder /tmp/lib ./lib
 COPY --from=builder /tmp/tools ./tools
-COPY --from=builder /tmp/tools/www ./tools/www
 COPY --from=builder /tmp/figuredata.xml .
 
 # Web
