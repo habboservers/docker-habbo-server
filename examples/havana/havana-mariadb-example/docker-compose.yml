@@ -8,7 +8,7 @@ services:
       MARIADB_USER: havana
       MARIADB_PASSWORD: havana
     ports:
-      - "3306:3306" # Expose MySQL on port 3306
+      - "3306:3306"
     volumes:
       - ./database:/docker-entrypoint-initdb.d
       - mariadb_data:/var/lib/mysql
@@ -21,8 +21,8 @@ services:
 
   habbo-server:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../../..
+      dockerfile: ../../../Dockerfile
     container_name: habbo-server
     ports:
       - "80:80" # Map port 80 on the host to port 80 in the container

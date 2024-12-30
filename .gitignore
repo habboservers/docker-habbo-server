@@ -1,4 +1,4 @@
-files/www/**
+**/www/**
 
 /.idea/
 .vscode

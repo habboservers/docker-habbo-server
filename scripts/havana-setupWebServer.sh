@@ -15,14 +15,8 @@ HABBO_WEBSERVER_TEMPLATE_DIRECTORY=${HABBO_WEBSERVER_TEMPLATE_DIRECTORY:-tools/w
 HABBO_WEBSERVER_TEMPLATE_NAME=${HABBO_WEBSERVER_TEMPLATE_NAME:-default-en}
 HABBO_WEBSERVER_PAGE_ENCODING=${HABBO_WEBSERVER_PAGE_ENCODING:-utf-8}
 
-# Fail if HABBO_MYSQL_PASSWORD is set to the default value 'changeme'
-if [ "$HABBO_MYSQL_PASSWORD" = "changeme" ]; then
-  echo "[level:ERROR][docker-habbo-web] Error: HABBO_MYSQL_PASSWORD is set to the default value 'changeme'. Please set a secure password."
-  exit 1
-fi
-
 # Generate the .ini file directly
-cat <<EOF > /data/webserver-config.ini
+cat <<EOF > /tmp/webserver-config.ini
 [Site]
 site.directory = $HABBO_WEBSERVER_SITE_DIRECTORY
 
