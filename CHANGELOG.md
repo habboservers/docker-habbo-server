@@ -19,7 +19,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - 
 
-## [0.0.1] - Havana Support - 30 Dec 2025
+## [0.0.1] - Havana Support - 30 Dec 2024
 
 ### Added
 
