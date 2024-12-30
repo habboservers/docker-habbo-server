@@ -24,6 +24,8 @@
 Help us #SaveHabboHotel! This Docker Image provides a quick setup for your Habbo Hotel server, providing the necessary
 configurations to run a Habbo Hotel Web Server alongside with an Emulator.
 
+Join our Discord: (https://discord.gg/m2FHK6Vtqz)[https://discord.gg/m2FHK6Vtqz]
+
 ## Supported versions
 
 This image currently supports the following versions:
