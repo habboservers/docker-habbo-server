@@ -1,0 +1,12 @@
+services:
+  habbo-server:
+    image: vitorvasc/habbo-hotel-server
+    container_name: habbo-server
+    ports:
+      - "80:80"
+    environment:
+      HABBO_MYSQL_HOST: "habbo-database"
+      HABBO_MYSQL_PORT: "3306"
+      HABBO_MYSQL_USERNAME: "havana"
+      HABBO_MYSQL_PASSWORD: "havana"
+      HABBO_MYSQL_DATABASE: "havana"
