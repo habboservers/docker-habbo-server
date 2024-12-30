@@ -1,34 +1,30 @@
-FROM ubuntu:latest AS builder
-
-RUN apt-get update && apt-get install -y \
-    wget \
-    unzip \
-    font-manager
+FROM alpine:latest AS builder
 
 WORKDIR /tmp
 
-# Download the latest release from Quackster/Havana
-RUN wget -qO havana.zip https://github.com/Quackster/Havana/releases/download/release-1.2/Havana_v1.2.zip && \
-    unzip havana.zip
+RUN apk add --no-cache \
+    curl \
+    unzip \
+    bash
 
-# Download the www files
-RUN mkdir ./tools/www && \
-    wget -qO www.zip https://cdn.habboservers.vasconcellos.tech/build/havana/v1.2/www.zip && \
-    unzip www.zip -d ./tools
+# Download the latest release from Quackster/Havana and the /www folder
+RUN curl -sL -o havana.zip https://github.com/Quackster/Havana/releases/download/release-1.2/Havana_v1.2.zip && \
+    unzip havana.zip && \
+    rm havana.zip && \
+    mkdir -p ./tools/www && \
+    curl -sL -o www.zip https://cdn.habboservers.vasconcellos.tech/build/havana/v1.2/www.zip && \
+    unzip www.zip -d ./tools && \
+    rm www.zip
 
 # Copy and create the config files
 COPY /havana/files/log4j.properties .
 COPY /havana/files/log4j.web.properties .
-
 COPY --chmod=755 scripts/havana-setup* .
 
-RUN [ "./havana-setup.sh" ]
+# Run the setup script
+RUN ./havana-setup.sh
 
-FROM ubuntu:latest AS final
-
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jre && \
-    apt-get clean
+FROM eclipse-temurin:17-jre-jammy AS final
 
 WORKDIR /data
 
