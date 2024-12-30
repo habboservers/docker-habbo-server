@@ -1,6 +1,6 @@
 services:
   habbo-server:
-    image: vitorvasc/habbo-hotel-server
+    image: vitorvasc/docker-habbo-server
     container_name: habbo-server
     ports:
       - "80:80"

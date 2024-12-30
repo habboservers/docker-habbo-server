@@ -20,9 +20,7 @@ services:
       retries: 3
 
   habbo-server:
-    build:
-      context: ../../..
-      dockerfile: ../../../Dockerfile
+    image: vitorvasc/docker-habbo-server
     container_name: habbo-server
     ports:
       - "80:80" # Map port 80 on the host to port 80 in the container
