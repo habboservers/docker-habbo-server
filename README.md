@@ -46,11 +46,11 @@ for more details.
 
 | Env                    | Default value |
 |------------------------|---------------|
-| `HABBO_MYSQL_HOST`     | 127.0.0.1     | 
-| `HABBO_MYSQL_PORT`     | 3306          | 
-| `HABBO_MYSQL_USERNAME` | havana        |  
-| `HABBO_MYSQL_PASSWORD` | changeme      |
-| `HABBO_MYSQL_DATABASE` | havana        |  
+| `HABBO_DATABASE_HOST`     | 127.0.0.1     | 
+| `HABBO_DATABASE_PORT`     | 3306          | 
+| `HABBO_DATABASE_USERNAME` | havana        |  
+| `HABBO_DATABASE_PASSWORD` | changeme      |
+| `HABBO_DATABASE_NAME` | havana        |  
 
 #### Server settings
 
