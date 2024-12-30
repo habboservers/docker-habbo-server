@@ -1,7 +1,6 @@
 FROM ubuntu:latest AS builder
 
 RUN apt-get update && apt-get install -y \
-    build-essential \
     wget \
     unzip \
     font-manager
@@ -12,8 +11,10 @@ WORKDIR /tmp
 RUN wget -qO havana.zip https://github.com/Quackster/Havana/releases/download/release-1.2/Havana_v1.2.zip && \
     unzip havana.zip
 
-# Copy the www files
-COPY /havana/files/www ./tools/www
+# Download the www files
+RUN mkdir ./tools/www && \
+    wget -qO www.zip https://cdn.habboservers.vasconcellos.tech/build/havana/v1.2/www.zip && \
+    unzip www.zip -d ./tools/www
 
 # Copy and create the config files
 COPY /havana/files/log4j.properties .
