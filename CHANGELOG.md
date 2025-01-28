@@ -19,6 +19,20 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - 
 
+## [1.0.1] - Dynamic Configuration Support - 28 Jan 2025
+
+### Added
+
+- feature: generate server.ini dynamically at runtime using environment variables (#2)
+
+### Changed
+
+- Updated Dockerfile and startup scripts to support runtime configuration.
+
+### Removed
+
+-
+
 ## [1.0.0] - Havana Support - 30 Dec 2024
 
 ### Added
