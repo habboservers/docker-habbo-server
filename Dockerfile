@@ -19,10 +19,6 @@ RUN curl -sL -o havana.zip https://github.com/Quackster/Havana/releases/download
 # Copy and create the config files
 COPY /havana/files/log4j.properties .
 COPY /havana/files/log4j.web.properties .
-COPY --chmod=755 scripts/havana-setup* .
-
-# Run the setup script
-RUN ./havana-setup.sh
 
 FROM eclipse-temurin:17-jre-jammy AS final
 
@@ -38,14 +34,15 @@ COPY --from=builder /tmp/figuredata.xml .
 # Web
 COPY --from=builder /tmp/Havana-Web.jar .
 COPY --from=builder /tmp/log4j.web.properties .
-COPY --from=builder /tmp/webserver-config.ini .
 COPY --from=builder --chmod=755 /tmp/run_web.sh .
 
 # Server
 COPY --from=builder /tmp/Havana-Server.jar .
 COPY --from=builder /tmp/log4j.properties .
-COPY --from=builder /tmp/server.ini .
 COPY --from=builder --chmod=755 /tmp/run_server.sh .
+
+# Setup script
+COPY --chmod=755 scripts/havana-setup* .
 
 # Start script
 COPY --chmod=755 scripts/havana-start.sh .
