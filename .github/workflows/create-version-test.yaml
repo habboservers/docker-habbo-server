@@ -98,7 +98,7 @@ jobs:
           echo $FULL_VERSION > VERSION
           git add VERSION
           git commit -m "chore: bump version to $FULL_VERSION"
-          git tag -a $NEW_TAG -m "Release $NEW_TAG"
+          git tag -a $NEW_TAG -m "$NEW_TAG"
           
           # Push changes back to PR branch
           git push origin $PR_BRANCH --follow-tags
