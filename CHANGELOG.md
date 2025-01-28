@@ -19,7 +19,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - 
 
-## [1.0.1] - Dynamic Configuration Support - 28 Jan 2025
+## [1.0.3] - 28 Jan 2025
 
 ### Added
 
