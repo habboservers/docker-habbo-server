@@ -1,9 +1,9 @@
-name: Release - Build Docker image
+name: Docker - Release - Build Docker image
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+    tags: ['*']
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
