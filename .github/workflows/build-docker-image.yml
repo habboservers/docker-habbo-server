@@ -1,8 +1,17 @@
-name: Docker - Release - Build Docker image
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# GitHub recommends pinning actions to a commit SHA.
+# To get a newer version, you will need to update the SHA.
+# You can also reference a tag or branch, but the action may change without warning.
+
+name: Release - Build Docker image
 
 on:
-  push:
-    tags: ['*']
+  release:
+    types: [published]
   workflow_dispatch:
 
 env:
@@ -18,25 +27,9 @@ jobs:
       contents: read
       attestations: write
       id-token: write
-
     steps:
-      - name: Check if is test version
-        id: check_version
-        run: |
-          TAG_NAME="${{ github.ref_name }}"
-          if [[ $TAG_NAME == *-test ]]; then
-            echo "is_test=true" >> $GITHUB_OUTPUT
-            echo "This is a test version: $TAG_NAME"
-          else
-            echo "is_test=false" >> $GITHUB_OUTPUT
-            echo "This is a release version: $TAG_NAME"
-          fi
-
       - name: Check out the repo
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 0
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3.8.0
@@ -56,57 +49,20 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Extract metadata for release version
-        id: meta_release
-        if: steps.check_version.outputs.is_test == 'false'
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
         uses: docker/metadata-action@v5.6.1
         with:
-          images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            vitorvasc/docker-habbo-server
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-            type=raw,value=latest
+          images: vitorvasc/docker-habbo-server
 
-      - name: Extract metadata for test version
-        id: meta_test
-        if: steps.check_version.outputs.is_test == 'true'
-        uses: docker/metadata-action@v5.6.1
-        with:
-          images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            vitorvasc/docker-habbo-server
-          tags: |
-            type=ref,event=tag
-            type=sha
-
-      - name: Build and push release Docker image
-        id: push_release
-        if: steps.check_version.outputs.is_test == 'false'
+      - name: Build and push Docker image
+        id: push
         uses: docker/build-push-action@v6.13.0
         with:
           context: .
           file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta_release.outputs.tags }}
-          labels: ${{ steps.meta_release.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push test Docker image
-        id: push_test
-        if: steps.check_version.outputs.is_test == 'true'
-        uses: docker/build-push-action@v6.13.0
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta_test.outputs.tags }}
-          labels: ${{ steps.meta_test.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
