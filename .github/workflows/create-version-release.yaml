@@ -95,8 +95,8 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: tagName,
-              name: `Release ${tagName}`,
-              body: `Release ${tagName}`,
+              name: `${tagName}`,
+              body: `${tagName}`,
               draft: false,
               prerelease: false,
               generate_release_notes: true

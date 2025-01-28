@@ -1,8 +1,9 @@
 name: Release - Build Docker image
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - 'v*.*.*'
 
 env:
   REGISTRY: ghcr.io
@@ -17,9 +18,25 @@ jobs:
       contents: read
       attestations: write
       id-token: write
+
     steps:
+      - name: Check if is test version
+        id: check_version
+        run: |
+          TAG_NAME="${{ github.ref_name }}"
+          if [[ $TAG_NAME == *-test ]]; then
+            echo "is_test=true" >> $GITHUB_OUTPUT
+            echo "This is a test version: $TAG_NAME"
+          else
+            echo "is_test=false" >> $GITHUB_OUTPUT
+            echo "This is a release version: $TAG_NAME"
+          fi
+
       - name: Check out the repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3.8.0
@@ -40,8 +57,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
+      - name: Extract metadata for release version
+        id: meta_release
+        if: steps.check_version.outputs.is_test == 'false'
         uses: docker/metadata-action@v5.6.1
         with:
           images: |
@@ -50,16 +68,43 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha
+            type=raw,value=latest
 
-      - name: Build and push Docker image
-        id: push
+      - name: Extract metadata for test version
+        id: meta_test
+        if: steps.check_version.outputs.is_test == 'true'
+        uses: docker/metadata-action@v5.6.1
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
+            type=sha
+
+      - name: Build and push release Docker image
+        id: push_release
+        if: steps.check_version.outputs.is_test == 'false'
         uses: docker/build-push-action@v6.13.0
         with:
           context: .
           file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta_release.outputs.tags }}
+          labels: ${{ steps.meta_release.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push test Docker image
+        id: push_test
+        if: steps.check_version.outputs.is_test == 'true'
+        uses: docker/build-push-action@v6.13.0
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta_test.outputs.tags }}
+          labels: ${{ steps.meta_test.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
