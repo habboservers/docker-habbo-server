@@ -14,6 +14,7 @@ on:
 
 jobs:
   create_version:
+    name: Create Release Version
     runs-on: ubuntu-latest
     permissions:
       contents: write

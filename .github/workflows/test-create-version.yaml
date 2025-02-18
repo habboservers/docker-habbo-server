@@ -9,6 +9,7 @@ on:
 
 jobs:
   create_version:
+    name: Create Test Version
     runs-on: ubuntu-latest
     permissions:
       contents: write
