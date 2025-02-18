@@ -4,20 +4,11 @@
   </a>
 </p>
 
-<p align="center" style="text-decoration: none !important;">
-    <a href="https://hub.docker.com/r/vitorvasc/docker-habbo-server/" style="text-decoration: none !important;">
-        <img src="https://img.shields.io/docker/pulls/vitorvasc/docker-habbo-server.svg" alt="#SaveHabboHotel" />
-    </a>
-    <a href="https://hub.docker.com/r/vitorvasc/docker-habbo-server/" style="text-decoration: none !important;">
-        <img src="https://img.shields.io/docker/stars/vitorvasc/docker-habbo-server.svg?maxAge=2592000" alt="#SaveHabboHotel" />
-    </a>
-    <a href="https://github.com/habboservers/docker-habbo-server/issues/" style="text-decoration: none !important;">
-        <img src="https://img.shields.io/github/issues-raw/habboservers/docker-habbo-server.svg" alt="#SaveHabboHotel" />
-    </a>
-    <a href="https://github.com/vitorvasc/docker-habbo-server/actions/workflows/release-create-version.yaml" style="text-decoration: none !important;">
-        <img src="https://github.com/habboservers/docker-habbo-server/actions/workflows/release-create-version.yaml/badge.svg" alt="#SaveHabboHotel" />
-    </a>
-</p>
+[![Docker Pulls](https://img.shields.io/docker/pulls/vitorvasc/docker-habbo-server.svg)](https://hub.docker.com/r/vitorvasc/docker-habbo-server/)
+[![Docker Stars](https://img.shields.io/docker/stars/vitorvasc/docker-habbo-server.svg?maxAge=2592000)](https://hub.docker.com/r/vitorvasc/docker-habbo-server/)
+[![GitHub Issues](https://img.shields.io/github/issues-raw/habboservers/docker-habbo-server.svg)](https://github.com/habboservers/docker-habbo-server/issues)
+[![Discord](https://img.shields.io/discord/1323397952680759326?label=Discord&logo=discord)](https://discord.gg/m2FHK6Vtqz)
+[![Build and Publish](https://github.com/habboservers/docker-habbo-server/actions/workflows/release-create-version.yaml/badge.svg)](https://github.com/habboservers/docker-habbo-server/actions/workflows/release-create-version.yaml)
 
 # 👋 Getting started
 
