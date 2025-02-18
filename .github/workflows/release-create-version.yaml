@@ -109,7 +109,7 @@ jobs:
             });
 
             core.setOutput('tag', tagName);
-            core.setOutput('version', version);
+
       - name: Report status
         if: ${{ success() }}
         run: |
