@@ -103,6 +103,26 @@ jobs:
               generate_release_notes: true
             });
 
+            core.setOutput('release_url', release.data.html_url);
+
+      - name: Trigger release event
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const newVersion = require('fs').readFileSync('VERSION', 'utf8').trim();
+            const tagName = `v${newVersion}`;
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: tagName,
+              name: `${tagName}`,
+              body: `${tagName}`,
+              draft: false,
+              prerelease: false,
+              generate_release_notes: true
+            });
+
       - name: Report status
         if: ${{ success() }}
         run: |
