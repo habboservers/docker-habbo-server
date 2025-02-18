@@ -117,13 +117,14 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const version = '${{ steps.version.outputs.version }}';
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'test-build-docker-image.yml', 
               ref: 'main',
               inputs: {
-                tag: steps.version.outputs.version
+                tag: version
               }
             });
 
