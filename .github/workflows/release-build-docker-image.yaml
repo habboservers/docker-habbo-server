@@ -6,11 +6,6 @@ on:
       tag:
         required: true
         type: string
-    permissions:
-      packages: write
-      contents: read
-      id-token: write
-      attestations: write
   workflow_dispatch:
     inputs:
       tag:
