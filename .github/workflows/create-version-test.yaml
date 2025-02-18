@@ -1,4 +1,4 @@
-name: Test - Generate Version
+name: Test - Create Version
 
 on:
   workflow_dispatch:
@@ -6,17 +6,9 @@ on:
       pull_request_number:
         description: 'Pull Request Number'
         required: true
-      version_type:
-        description: 'Version Type (major/minor/patch)'
-        required: true
-        type: choice
-        options:
-          - patch
-          - minor
-          - major
 
 jobs:
-  generate_version:
+  create_version:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -32,7 +24,7 @@ jobs:
               repo: context.repo.repo,
               username: context.actor
             });
-            
+
             if (!['admin', 'write'].includes(permission.permission)) {
               core.setFailed('Only repository maintainers can trigger this workflow');
               return;
@@ -48,70 +40,68 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
 
-      - name: Generate new version
+      - name: Create new version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.inputs.pull_request_number }}
-          VERSION_TYPE: ${{ github.event.inputs.version_type }}
         run: |
           # Fetch the PR branch
           PR_DATA=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
             "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER")
-          
+
           PR_BRANCH=$(echo $PR_DATA | jq -r .head.ref)
-          
+
           # Checkout PR branch
           git fetch origin $PR_BRANCH
           git checkout $PR_BRANCH
 
-          # Get current version
-          CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          
-          # Remove 'v' prefix and any branch suffix
-          CURRENT_VERSION=$(echo $CURRENT_VERSION | sed 's/v$.*$-.*-test/\1/')
-          CURRENT_VERSION=${CURRENT_VERSION#v}
-          
-          # Split version into components
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-          
-          # Calculate new version based on input type
-          case $VERSION_TYPE in
-            major)
-              NEW_VERSION="$((MAJOR + 1)).0.0"
-              ;;
-            minor)
-              NEW_VERSION="${MAJOR}.$((MINOR + 1)).0"
-              ;;
-            patch)
-              NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
-              ;;
-          esac
+          # Clean branch name: remove prefixes and special characters
+          CLEAN_BRANCH=$(echo $PR_BRANCH | sed 's/.*\///' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
 
-          # Sanitize branch name (remove special characters and convert to lowercase)
-          BRANCH_NAME=$(echo $PR_BRANCH | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
-          
+          # Find existing versions for this branch
+          EXISTING_TAGS=$(git tag -l "*-${CLEAN_BRANCH}")
+
+          if [ -z "$EXISTING_TAGS" ]; then
+            # No existing tags for this branch, start with 0.0.1
+            NEW_VERSION="0.0.1"
+          else
+            # Get the latest version number for this branch
+            LATEST_VERSION=$(echo "$EXISTING_TAGS" | sort -V | tail -n1 | sed "s/-${CLEAN_BRANCH}//")
+            
+            # Extract the patch number and increment it
+            PATCH=$(echo $LATEST_VERSION | cut -d. -f3)
+            NEW_PATCH=$((PATCH + 1))
+            NEW_VERSION="0.0.${NEW_PATCH}"
+          fi
+
           # Create new version with branch name
-          FULL_VERSION="${NEW_VERSION}-${BRANCH_NAME}-test"
-          NEW_TAG="v${FULL_VERSION}"
-          
+          FULL_VERSION="${NEW_VERSION}-${CLEAN_BRANCH}"
+
           # Create version commit and tag
           echo $FULL_VERSION > VERSION
           git add VERSION
           git commit -m "chore: bump version to $FULL_VERSION"
-          git tag -a $NEW_TAG -m "$NEW_TAG"
-          
+          git tag -a $FULL_VERSION -m "$FULL_VERSION"
+
           # Push changes back to PR branch
           git push origin $PR_BRANCH --follow-tags
+
+          echo "Created new version: $FULL_VERSION"
 
       - name: Update PR with version info
         uses: actions/github-script@v7
         with:
           script: |
             const newVersion = require('fs').readFileSync('VERSION', 'utf8').trim();
-            
+
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: ${{ github.event.inputs.pull_request_number }},
               body: `🏷️ New version generated: v${newVersion}`
             });
+
+      - name: Report status
+        if: ${{ success }}
+        run: |
+          echo "Pipeline executed successfully."
