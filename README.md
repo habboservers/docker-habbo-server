@@ -14,8 +14,8 @@
     <a href="https://github.com/habboservers/docker-habbo-server/issues/" style="text-decoration: none !important;">
         <img src="https://img.shields.io/github/issues-raw/habboservers/docker-habbo-server.svg" alt="#SaveHabboHotel" />
     </a>
-    <a href="https://github.com/vitorvasc/docker-habbo-server/actions/workflows/release-build-docker-image.yml" style="text-decoration: none !important;">
-        <img src="https://github.com/habboservers/docker-habbo-server/actions/workflows/release-build-docker-image.yml/badge.svg" alt="#SaveHabboHotel" />
+    <a href="https://github.com/vitorvasc/docker-habbo-server/actions/workflows/release-create-version.yaml" style="text-decoration: none !important;">
+        <img src="https://github.com/habboservers/docker-habbo-server/actions/workflows/release-create-version.yaml/badge.svg" alt="#SaveHabboHotel" />
     </a>
 </p>
 
