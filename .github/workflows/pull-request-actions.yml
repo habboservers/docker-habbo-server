@@ -1,4 +1,4 @@
-name: Execute PR Actions
+name: Run PR pipeline
 
 on:
   pull_request:
@@ -7,24 +7,21 @@ on:
 
   workflow_run:
     workflows:
-      - Test - Generate Version
+      - Test - Create Version
     types:
       - completed
 
 jobs:
-  request-approval:
+  wait-for-approval:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Notify about PR
-        run: echo "A PR has been created or updated. Approval to trigger the pipeline is required."
-
-      - name: '✅ [RESULT] Test - Generate Version'
+      - name: '✅ [RESULT] Test - Create Version'
         if: ${{ github.event.workflow_run.conclusion == 'success' }}
-        run: echo "The workflow 'Test - Generate Version' was completed successfully."
+        run: echo "The workflow 'Test - Create Version' was completed successfully."
 
-      - name: '❌ [RESULT] Test - Generate Version'
+      - name: '❌ [RESULT] Test - Create Version'
         if: ${{ github.event.workflow_run.conclusion != 'success' }}
         run: |
-          echo "There was a failure when running the workflow 'Test - Generate Version'."
+          echo "There was a failure when running the workflow 'Test - Create Version'."
           exit 1

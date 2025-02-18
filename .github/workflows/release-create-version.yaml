@@ -1,4 +1,4 @@
-name: Release - Generate Version
+name: Release - Create Version
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ on:
           - major
 
 jobs:
-  generate_version:
+  create_version:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -45,7 +45,7 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "actions@github.com"
 
-      - name: Generate new version
+      - name: Create new version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION_TYPE: ${{ github.event.inputs.version_type }}
