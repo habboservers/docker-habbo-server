@@ -101,3 +101,18 @@ jobs:
               prerelease: false,
               generate_release_notes: true
             });
+
+      - name: Save tag as artifact
+        run: echo "${{ steps.version.outputs.version }}" > tag.txt
+      
+      - name: Upload tag artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tag
+          path: tag.txt
+
+      - name: Report status
+        if: ${{ success }}
+        run: |
+          echo "Pipeline executed successfully."
+
