@@ -102,6 +102,6 @@ jobs:
             });
 
       - name: Report status
-        if: ${{ success }}
+        if: ${{ success() }}
         run: |
           echo "Pipeline executed successfully."
