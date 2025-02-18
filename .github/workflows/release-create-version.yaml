@@ -116,7 +116,13 @@ jobs:
           echo "Pipeline executed successfully."
 
   build_docker:
+    name: Build Docker Image
     needs: create_version
+    permissions: 
+      packages: write
+      contents: read
+      id-token: write
+      attestations: write
     uses: ./.github/workflows/release-build-docker-image.yaml
     with:
       tag: ${{ needs.create_version.outputs.tag }}
