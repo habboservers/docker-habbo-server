@@ -41,7 +41,6 @@ jobs:
           git config user.email "actions@github.com"
 
       - name: Create new version
-        id: version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.inputs.pull_request_number }}
@@ -56,33 +55,41 @@ jobs:
           git fetch origin $PR_BRANCH
           git checkout $PR_BRANCH
 
-          # Clean branch name: remove prefixes and special characters
-          CLEAN_BRANCH=$(echo $PR_BRANCH | sed 's/.*\///' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          # Get current version
+          CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
 
-          # Find existing versions for this branch
-          EXISTING_TAGS=$(git tag -l "*-${CLEAN_BRANCH}")
+          # Remove 'v' prefix and any branch suffix
+          CURRENT_VERSION=$(echo $CURRENT_VERSION | sed 's/v$.*$-.*-test/\1/')
+          CURRENT_VERSION=${CURRENT_VERSION#v}
 
-          if [ -z "$EXISTING_TAGS" ]; then
-            # No existing tags for this branch, start with 0.0.1
-            NEW_VERSION="0.0.1"
-          else
-            # Get the latest version number for this branch
-            LATEST_VERSION=$(echo "$EXISTING_TAGS" | sort -V | tail -n1 | sed "s/-${CLEAN_BRANCH}//")
-            
-            # Extract the patch number and increment it
-            PATCH=$(echo $LATEST_VERSION | cut -d. -f3)
-            NEW_PATCH=$((PATCH + 1))
-            NEW_VERSION="0.0.${NEW_PATCH}"
-          fi
+          # Split version into components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+          # Calculate new version based on input type
+          case $VERSION_TYPE in
+            major)
+              NEW_VERSION="$((MAJOR + 1)).0.0"
+              ;;
+            minor)
+              NEW_VERSION="${MAJOR}.$((MINOR + 1)).0"
+              ;;
+            patch)
+              NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+              ;;
+          esac
+
+          # Sanitize branch name (remove special characters and convert to lowercase)
+          BRANCH_NAME=$(echo $PR_BRANCH | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
 
           # Create new version with branch name
-          FULL_VERSION="${NEW_VERSION}-${CLEAN_BRANCH}"
+          FULL_VERSION="${NEW_VERSION}-${BRANCH_NAME}-test"
+          NEW_TAG="v${FULL_VERSION}"
 
           # Create version commit and tag
           echo $FULL_VERSION > VERSION
           git add VERSION
           git commit -m "chore: bump version to $FULL_VERSION"
-          git tag -a $FULL_VERSION -m "$FULL_VERSION"
+          git tag -a $NEW_TAG -m "$NEW_TAG"
 
           # Push changes back to PR branch
           git push origin $PR_BRANCH --follow-tags
@@ -112,23 +119,7 @@ jobs:
               body: `🏷️ New version generated: v${newVersion}`
             });
 
-      - name: Trigger Docker Build Workflow
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          script: |
-            const version = '${{ steps.version.outputs.version }}';
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'test-build-docker-image.yml', 
-              ref: 'main',
-              inputs: {
-                tag: version
-              }
-            });
-
       - name: Report status
-        if: ${{ success() }}
+        if: ${{ success }}
         run: |
           echo "Pipeline executed successfully."
