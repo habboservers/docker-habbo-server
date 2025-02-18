@@ -90,10 +90,10 @@ The database settings applies for both server and web configurations. The values
 | `HABBO_WEBSERVER_EMAIL_STATIC_CONTENT_PATH`     | http://localhost      | Web        |
 | `HABBO_WEBSERVER_EMAIL_SMTP_HOST`               | _(no value)_          | Web        |
 | `HABBO_WEBSERVER_EMAIL_SMTP_PORT`               | 465                   | Web        |
-| `HABBO_WEBSERVER_TEMPLATE_NAME`                 | _(no value)_          | Web        |
-| `HABBO_WEBSERVER_TEMPLATE_NAME`                 | _(no value)_          | Web        |
-| `HABBO_WEBSERVER_TEMPLATE_NAME`                 | _(no value)_          | Web        |
-| `HABBO_WEBSERVER_TEMPLATE_NAME`                 | _(no value)_          | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_USERNAME`     | _(no value)_          | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_PASSWORD`     | _(no value)_          | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_FROM_EMAIL`         | _(no value)_          | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME`          | _(no value)_          | Web        |
 
 ## 🦺 Help us keep the Habbo Hotel alive
 
