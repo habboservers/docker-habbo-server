@@ -1,7 +1,14 @@
 #!/bin/bash
 
 # Set default values for environment variables if they are not already set
+: "${HABBO_WEBSERVER_SITE_NAME:=Habbo}"
+: "${HABBO_WEBSERVER_SITE_PATH:=http://localhost}"
+: "${HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT:=http://localhost:5000}"
+: "${HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT_TIMEOUT:=30000}"
 : "${HABBO_WEBSERVER_SITE_DIRECTORY:=tools/www}"
+: "${HABBO_WEBSERVER_STATIC_CONTENT_PATH:=http://localhost}"
+: "${HABBO_WEBSERVER_MAINTENANCE:=false}"
+: "${HABBO_WEBSERVER_PAGE_ENCODING:=utf-8}"
 : "${HABBO_WEBSERVER_IP_BIND:=127.0.0.1}"
 : "${HABBO_WEBSERVER_PORT:=80}"
 : "${HABBO_SERVER_RCON_IP_BIND:=127.0.0.1}"
@@ -13,12 +20,27 @@
 : "${HABBO_DATABASE_NAME:=havana}"
 : "${HABBO_WEBSERVER_TEMPLATE_DIRECTORY:=tools/www-tpl}"
 : "${HABBO_WEBSERVER_TEMPLATE_NAME:=default-en}"
-: "${HABBO_WEBSERVER_PAGE_ENCODING:=utf-8}"
+: "${HABBO_WEBSERVER_EMAIL_SMTP_ENABLE:=false}"
+: "${HABBO_WEBSERVER_EMAIL_STATIC_CONTENT_PATH:=http://localhost}"
+: "${HABBO_WEBSERVER_EMAIL_SMTP_HOST:=}"
+: "${HABBO_WEBSERVER_EMAIL_SMTP_PORT:=465}"
+: "${HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_USERNAME:=}"
+: "${HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_PASSWORD:=}"
+: "${HABBO_WEBSERVER_EMAIL_SMTP_FROM_EMAIL:=}"
+: "${HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME:=}"
 
 # Generate the .ini file directly
 cat <<EOF > /data/webserver-config.ini
 [Site]
+site.name = $HABBO_WEBSERVER_SITE_NAME
+site.path = $HABBO_WEBSERVER_SITE_PATH
+site.imaging.endpoint = $HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT
+site.imaging.endpoint.timeout = $HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT_TIMEOUT
 site.directory = $HABBO_WEBSERVER_SITE_DIRECTORY
+static.content.path = $HABBO_WEBSERVER_STATIC_CONTENT_PATH
+
+maintenance = $HABBO_WEBSERVER_MAINTENANCE
+page.encoding = $HABBO_WEBSERVER_PAGE_ENCODING
 
 [Global]
 bind.ip = $HABBO_WEBSERVER_IP_BIND
@@ -39,7 +61,16 @@ mysql.database = $HABBO_DATABASE_NAME
 template.directory = $HABBO_WEBSERVER_TEMPLATE_DIRECTORY
 template.name = $HABBO_WEBSERVER_TEMPLATE_NAME
 
-page.encoding = $HABBO_WEBSERVER_PAGE_ENCODING
+[SMTP]
+email.smtp.enable = $HABBO_WEBSERVER_EMAIL_SMTP_ENABLE
+email.static.content.path = $HABBO_WEBSERVER_EMAIL_STATIC_CONTENT_PATH
+email.smtp.host = $HABBO_WEBSERVER_EMAIL_SMTP_HOST
+email.smtp.port = $HABBO_WEBSERVER_EMAIL_SMTP_PORT
+email.smtp.login.username = $HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_USERNAME
+email.smtp.login.password = $HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_PASSWORD
+email.smtp.from.email = $HABBO_WEBSERVER_EMAIL_SMTP_FROM_EMAIL
+email.smtp.from.name = $HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME
+
 EOF
 
 echo "[level:INFO][docker-habbo-web] Configuration file generated"
