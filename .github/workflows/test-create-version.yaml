@@ -120,7 +120,7 @@ jobs:
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              workflow_id: 'build-docker-image-test.yml', 
+              workflow_id: 'test-build-docker-image.yml', 
               ref: 'main',
               inputs: {
                 tag: steps.version.outputs.version
