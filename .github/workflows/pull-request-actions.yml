@@ -7,7 +7,7 @@ on:
 
   workflow_run:
     workflows:
-      - Test - Create Version
+      - 'Test - Create Version'
     types:
       - completed
 
@@ -16,12 +16,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Wait for manual approval 
+        if: ${{ github.event_name == 'pull_request' }}
+        run: echo "Waiting for manual approval to run the pipeline."
+
       - name: '✅ [RESULT] Test - Create Version'
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
         run: echo "The workflow 'Test - Create Version' was completed successfully."
 
       - name: '❌ [RESULT] Test - Create Version'
-        if: ${{ github.event.workflow_run.conclusion != 'success' }}
+        if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' }}
         run: |
           echo "There was a failure when running the workflow 'Test - Create Version'."
           exit 1
