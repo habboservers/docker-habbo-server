@@ -19,6 +19,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      tag: ${{ steps.create_release.outputs.tag }}
 
     steps:
       - name: Check user permissions
@@ -85,7 +87,10 @@ jobs:
           # Push changes back to main branch
           git push origin main --follow-tags
 
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
       - name: Create Release
+        id: create_release
         uses: actions/github-script@v7
         with:
           script: |
@@ -103,28 +108,16 @@ jobs:
               generate_release_notes: true
             });
 
-            core.setOutput('release_url', release.data.html_url);
-
-      - name: Trigger release event
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const newVersion = require('fs').readFileSync('VERSION', 'utf8').trim();
-            const tagName = `v${newVersion}`;
-
-            await github.rest.repos.createRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: tagName,
-              name: `${tagName}`,
-              body: `${tagName}`,
-              draft: false,
-              prerelease: false,
-              generate_release_notes: true
-            });
-
+            core.setOutput('tag', tagName);
+            core.setOutput('version', version);
       - name: Report status
         if: ${{ success() }}
         run: |
           echo "Pipeline executed successfully."
 
+  build_docker:
+    needs: create_version
+    uses: ./.github/workflows/release-build-docker-image.yaml
+    with:
+      tag: ${{ needs.create_version.outputs.tag }}
+    secrets: inherit

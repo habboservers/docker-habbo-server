@@ -1,8 +1,11 @@
 name: Release - Build Docker image
 
 on:
-  release:
-    types: [created]
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       tag:
@@ -27,12 +30,7 @@ jobs:
       - name: Process version
         id: version
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            TAG="${{ github.event.inputs.tag }}"
-          else
-            TAG="${{ github.event.release.tag_name }}"
-          fi
-          
+          TAG="${{ inputs.tag }}"
           VERSION="${TAG#v}"  # Remove 'v' prefix
                   
           echo "version=$VERSION" >> $GITHUB_OUTPUT
