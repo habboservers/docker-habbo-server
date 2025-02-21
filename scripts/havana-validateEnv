@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Generate a hash based on the existing configuration file
+generate_file_hash() {
+    local config_file=$1
+
+    if [ ! -f "$config_file" ]; then
+        # If the file doesn't exist, return a hash for an empty state
+        echo "empty" | sha256sum | cut -d' ' -f1
+    else
+        # Generate a hash of the file's content
+        sha256sum "$config_file" | cut -d' ' -f1
+    fi
+}
+
+# Check if the configuration file needs to be updated
+check_file_state() {
+    local config_file=$1
+    local state_file=$2
+
+    # Generate the current hash of the configuration file
+    local current_hash
+    current_hash=$(generate_file_hash "$config_file")
+
+    # Compare with the stored hash
+    if [ -f "$state_file" ] && [ "$(cat "$state_file")" = "$current_hash" ]; then
+        return 1  # No update needed
+    fi
+
+    # Save the new hash to the state file
+    echo "$current_hash" > "$state_file"
+    return 0  # Update needed
+}
+
+# Validate environment variables
+validate_env_vars() {
+    local required_vars=("$@")
+    local missing_vars=()
+
+    for var in "${required_vars[@]}"; do
+        if [ -z "${!var}" ]; then
+            missing_vars+=("$var")
+        fi
+    done
+
+    if [ ${#missing_vars[@]} -ne 0 ]; then
+        echo "[level:ERROR][docker-havana] Missing required environment variables: ${missing_vars[*]}" >&2
+        return 1
+    fi
+
+    return 0
+}
+
+# If script is run directly, show usage
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "This script is meant to be sourced by other scripts."
+    echo "Usage: source $(basename "${BASH_SOURCE[0]}")"
+    exit 1
+fi
