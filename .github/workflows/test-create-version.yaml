@@ -122,14 +122,14 @@ jobs:
           echo "Pipeline executed successfully."
 
   build_docker:
-    name: Build Doker Image
+    name: Build Docker Image
     needs: version_info
     permissions:
       packages: write
       contents: read
       id-token: write
       attestations: write
-    uses: ./../.github/workflows/test-build-docker-image.yaml
+    uses: ./.github/workflows/test-build-docker-image.yaml
     with:
       tag: ${{ needs.version_info.outputs.tag }}
     secrets: inherit
