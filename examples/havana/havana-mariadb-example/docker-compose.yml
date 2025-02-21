@@ -20,7 +20,7 @@ services:
       retries: 3
 
   habbo-server:
-    image: vitorvasc/docker-habbo-server:0.0.13-enhancement-havana-setup-test
+    image: vitorvasc/docker-habbo-server:latest
     container_name: habbo-server
     ports:
       - "80:80" # Map port 80 used on the web server
