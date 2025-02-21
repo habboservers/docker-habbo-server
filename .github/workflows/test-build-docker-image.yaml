@@ -21,44 +21,12 @@ jobs:
   push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     permissions:
       packages: write
       contents: read
       attestations: write
       id-token: write
     steps:
-      - name: Get version tag
-        if: github.event_name == 'workflow_run'
-        id: get_tag
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
-              owner: context.repo.owner,
-              repo: context.repo.name,
-              run_id: context.payload.workflow_run.id
-            });
-
-            const tagArtifact = artifacts.data.artifacts.find(artifact => artifact.name === 'tag');
-            if (!tagArtifact) {
-              throw new Error('No tag artifact found from previous workflow');
-            }
-
-            const download = await github.rest.actions.downloadArtifact({
-              owner: context.repo.owner,
-              repo: context.repo.name,
-              artifact_id: tagArtifact.id,
-              archive_format: 'zip'
-            });
-
-            const fs = require('fs');
-            fs.writeFileSync('tag.zip', Buffer.from(download.data));
-
-            require('child_process').execSync('unzip tag.zip');
-            const tag = fs.readFileSync('tag.txt', 'utf8').trim();
-            core.setOutput('tag', tag);
-
       - name: Process version
         id: version
         run: |
@@ -106,7 +74,7 @@ jobs:
         with:
           images: vitorvasc/docker-habbo-server
           tags: |
-            type=raw,value=${{ steps.version.outputs.version }}
+            type=raw,value=${{ steps.version.outputs.tag }}
 
       - name: Build and push Docker image
         id: push
