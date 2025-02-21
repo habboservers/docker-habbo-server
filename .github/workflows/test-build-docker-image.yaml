@@ -30,17 +30,13 @@ jobs:
       - name: Process version
         id: version
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            TAG="${{ github.event.inputs.tag }}"
-          else
-            TAG="${{ inputs.tag }}"
-          fi
-          
-          # Keep the full tag as is, without removing the 'v' prefix
-          echo "version=$TAG" >> $GITHUB_OUTPUT
+          TAG="${{ inputs.tag }}"
+          VERSION="${TAG#v}"  # Remove 'v' prefix
+                  
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "Selected tag: $TAG"
-          echo "Processed version: $TAG"
+          echo "Processed version: $VERSION"
 
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -66,6 +62,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract metadata for release version
+        id: meta
+        uses: docker/metadata-action@v5.6.1
+        with:
+          images: vitorvasc/docker-habbo-server
+          tags: |
+            type=raw,value=${{ steps.version.outputs.version }}
+      
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6.13.0
@@ -74,6 +78,5 @@ jobs:
           file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
-            vitorvasc/docker-habbo-server:${{ steps.version.outputs.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
