@@ -3,9 +3,23 @@
 : "${HAVANA_RELEASE_VERSION:=latest}"
 : "${HAVANA_GITHUB_REPOSITORY:=Quackster/Havana}"
 
+# Create the version identifier based on repository / version
+create_version_identifier() {
+    local version=$1
+    echo "${HAVANA_GITHUB_REPOSITORY}@${version}"
+}
+
+extract_version() {
+    local identifier=$1
+    echo "$identifier" | cut -d'@' -f1
+}
+
 # Function to get latest release version
 get_latest_version() {
-    curl -s "https://api.github.com/repos/${HAVANA_GITHUB_REPOSITORY}/releases/latest" | jq -r '.tag_name'
+    local version=$(curl -s "https://api.github.com/repos/${HAVANA_GITHUB_REPOSITORY}/releases/latest" | jq -r '.tag_name')
+    if [ -n "$version" ]; then
+        create_version_identifier "$version"
+    fi
 }
 
 # Function to get current installed version
@@ -19,49 +33,52 @@ get_installed_version() {
 
 # Function to download and install Havana
 install_havana() {
-    local version=$1
-    echo "[level:INFO][docker-havana] Downloading $HAVANA_GITHUB_REPOSITORY version: $version"
+    local version_identifier=$1
+    local version=$(extract_version "$version_identifier")
+    local repository=$(extract_repository "$version_identifier")
+    echo "[level:INFO][docker-havana] Downloading from repository: $repository | version: $version"
     
-    ASSET_URL=$(curl -s "https://api.github.com/repos/${HAVANA_GITHUB_REPOSITORY}/releases/latest" | jq -r '.assets[0].browser_download_url')
-    if [[ $ASSET_URL ]]; then
+    ASSET_URL=$(curl -s "https://api.github.com/repos/${repository}/releases/latest" | jq -r '.assets[0].browser_download_url')
+if [[ $ASSET_URL ]]; then
         if curl -fsL -o havana.zip "${ASSET_URL}" &&
            unzip -o havana.zip -d ${HAVANA_BASE_DIR} && 
            rm havana.zip; then
-            echo "$version" > "/tmp/havana_version"
-            echo "[level:INFO][docker-havana] Successfully installed $HAVANA_GITHUB_REPOSITORY version: $version"
+            echo "$version_identifier" > "/tmp/havana_version"
+            echo "[level:INFO][docker-havana] Successfully installed from $repository | version: $version"
             return 0
         else
-            echo "[level:ERROR][docker-havana] Failed to install $HAVANA_GITHUB_REPOSITORY version: $version" >&2
+            echo "[level:ERROR][docker-havana] Failed to install from $repository | version: $version" >&2
             return 1
         fi
     else
-        echo "[level:ERROR][docker-havana] Failed to get download URL for version: $version" >&2
+        echo "[level:ERROR][docker-havana] Failed to get download URL for $repository | version: $version" >&2
         return 1
     fi
 }
 
 # Get latest version from GitHub
-LATEST_VERSION=$(get_latest_version)
-if [ -z "$LATEST_VERSION" ]; then
+LATEST_VERSION_IDENTIFIER=$(get_latest_version)
+if [ -z "$LATEST_VERSION_IDENTIFIER" ]; then
     echo "[level:ERROR][docker-havana] Failed to get latest version information" >&2
     exit 1
 fi
 
 # Get currently installed version
-CURRENT_VERSION=$(get_installed_version)
+CURRENT_VERSION_IDENTIFIER=$(get_installed_version)
 
-echo "[level:INFO][docker-havana] Latest version: $LATEST_VERSION"
-echo "[level:INFO][docker-havana] Current version: $CURRENT_VERSION"
+echo "[level:INFO][docker-havana] Latest version: $(extract_version "$LATEST_VERSION_IDENTIFIER")"
+echo "[level:INFO][docker-havana] Latest repository: $(extract_repository "$LATEST_VERSION_IDENTIFIER")"
+echo "[level:INFO][docker-havana] Current version identifier: $CURRENT_VERSION_IDENTIFIER"
 
 # Check if we need to install/upgrade
-if [ "$CURRENT_VERSION" = "none" ] || [ "$CURRENT_VERSION" != "$LATEST_VERSION" ]; then
+if [ "$CURRENT_VERSION_IDENTIFIER" = "none" ] || [ "$CURRENT_VERSION_IDENTIFIER" != "$LATEST_VERSION_IDENTIFIER" ]; then
     echo "[level:INFO][docker-havana] New version detected, installing/upgrading..."
-    if ! install_havana "$LATEST_VERSION"; then
+    if ! install_havana "$LATEST_VERSION_IDENTIFIER"; then
         echo "[level:ERROR][docker-havana] Installation/upgrade failed!" >&2
         exit 1
     fi
 else
-    echo "[level:INFO][docker-havana] Already running latest version, skipping installation"
+    echo "[level:INFO][docker-havana] Already running latest version from current repository, skipping installation"
 fi
 
 # Setup Web Server if not disabled
@@ -70,24 +87,24 @@ if [ "$HAVANA_DISABLE_WEBSERVER" != "true" ]; then
         echo "[level:INFO][docker-havana-web] Running Web Server setup..."
         if "$DEFAULT_SCRIPTS_PATH/havana-setupWebServer"; then
             echo "[level:INFO][docker-havana-web] Web Server setup executed successfully."
-            echo "$LATEST_VERSION" > "/tmp/havana_web_setup_complete"
+            echo "$LATEST_VERSION_IDENTIFIER" > "/tmp/havana_web_setup_complete"
         else
             echo "[level:ERROR][docker-havana-web] ERROR: Web Server setup failed!" >&2
             exit 1
         fi
     else
-        SETUP_VERSION=$(cat "/tmp/havana_web_setup_complete")
-        if [ "$SETUP_VERSION" != "$LATEST_VERSION" ]; then
+        SETUP_VERSION_IDENTIFIER=$(cat "/tmp/havana_web_setup_complete")
+        if [ "$SETUP_VERSION_IDENTIFIER" != "$LATEST_VERSION_IDENTIFIER" ]; then
             echo "[level:INFO][docker-havana-web] New version detected, running Web Server setup..."
             if "$DEFAULT_SCRIPTS_PATH/havana-setupWebServer"; then
                 echo "[level:INFO][docker-havana-web] Web Server setup executed successfully."
-                echo "$LATEST_VERSION" > "/tmp/havana_web_setup_complete"
+                echo "$LATEST_VERSION_IDENTIFIER" > "/tmp/havana_web_setup_complete"
             else
                 echo "[level:ERROR][docker-havana-web] ERROR: Web Server setup failed!" >&2
                 exit 1
             fi
         else
-            echo "[level:INFO][docker-havana-web] Web Server setup already complete for version $SETUP_VERSION, skipping..."
+            echo "[level:INFO][docker-havana-web] Web Server setup already complete for $(extract_repository "$SETUP_VERSION_IDENTIFIER") version $(extract_version "$SETUP_VERSION_IDENTIFIER"), skipping..."
         fi
     fi
 fi
@@ -98,24 +115,24 @@ if [ "$HAVANA_DISABLE_SERVER" != "true" ]; then
         echo "[level:INFO][docker-havana-server] Running Server setup..."
         if "$DEFAULT_SCRIPTS_PATH/havana-setupServer"; then
             echo "[level:INFO][docker-havana-server] Server setup executed successfully."
-            echo "$LATEST_VERSION" > "/tmp/havana_server_setup_complete"
+            echo "$LATEST_VERSION_IDENTIFIER" > "/tmp/havana_server_setup_complete"
         else
             echo "[level:ERROR][docker-havana-server] ERROR: Server setup failed!" >&2
             exit 1
         fi
     else
-        SETUP_VERSION=$(cat "/tmp/havana_server_setup_complete")
-        if [ "$SETUP_VERSION" != "$LATEST_VERSION" ]; then
+        SETUP_VERSION_IDENTIFIER=$(cat "/tmp/havana_server_setup_complete")
+        if [ "$SETUP_VERSION_IDENTIFIER" != "$LATEST_VERSION_IDENTIFIER" ]; then
             echo "[level:INFO][docker-havana-server] New version detected, running Server setup..."
             if "$DEFAULT_SCRIPTS_PATH/havana-setupServer"; then
                 echo "[level:INFO][docker-havana-server] Server setup executed successfully."
-                echo "$LATEST_VERSION" > "/tmp/havana_server_setup_complete"
+                echo "$LATEST_VERSION_IDENTIFIER" > "/tmp/havana_server_setup_complete"
             else
                 echo "[level:ERROR][docker-havana-server] ERROR: Server setup failed!" >&2
                 exit 1
             fi
         else
-            echo "[level:INFO][docker-havana-server] Server setup already complete for version $SETUP_VERSION, skipping..."
+            echo "[level:INFO][docker-havana-server] Server setup already complete for $(extract_repository "$SETUP_VERSION_IDENTIFIER") version $(extract_version "$SETUP_VERSION_IDENTIFIER"), skipping..."
         fi
     fi
 fi

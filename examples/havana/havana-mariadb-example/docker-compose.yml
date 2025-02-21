@@ -20,11 +20,13 @@ services:
       retries: 3
 
   habbo-server:
-    image: vitorvasc/docker-habbo-server:0.0.10-enhancement-havana-setup-test
+    image: vitorvasc/docker-habbo-server:0.0.11-enhancement-havana-setup-test
     container_name: habbo-server
     ports:
       - "80:80" # Map port 80 used on the web server
       - "12321:12321" # Map port 12321 used on the game server
+    volumes:
+      - habboserver_data:/data
     depends_on:
       habbo-database:
         condition: service_healthy
@@ -34,6 +36,8 @@ services:
       HABBO_DATABASE_USERNAME: "havana"
       HABBO_DATABASE_PASSWORD: "havana"
       HABBO_DATABASE_NAME: "havana"
+      HABBO_WEBSERVER_STATIC_CONTENT_PATH: "https://cdn.habboservers.com/havana"
 
 volumes:
+  habboserver_data:
   mariadb_data:
