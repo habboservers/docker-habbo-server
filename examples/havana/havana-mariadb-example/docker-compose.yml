@@ -20,10 +20,11 @@ services:
       retries: 3
 
   habbo-server:
-    image: vitorvasc/docker-habbo-server:1.0.3
+    image: vitorvasc/docker-habbo-server:0.0.10-enhancement-havana-setup-test
     container_name: habbo-server
     ports:
-      - "80:80" # Map port 80 on the host to port 80 in the container
+      - "80:80" # Map port 80 used on the web server
+      - "12321:12321" # Map port 12321 used on the game server
     depends_on:
       habbo-database:
         condition: service_healthy

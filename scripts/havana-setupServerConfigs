@@ -21,7 +21,7 @@ echo "[level:INFO][docker-habbo-server] Generating configuration file..."
 : "${HABBO_SERVER_DEBUG:=false}"
 
 # Generate the .ini file directly
-cat <<EOF > /data/server.ini
+cat <<EOF > $HAVANA_BASE_DIR/server.ini
 [Global]
 server.bind = $HABBO_SERVER_IP_BIND
 server.port = $HABBO_SERVER_PORT

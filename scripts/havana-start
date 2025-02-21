@@ -4,7 +4,7 @@ export HAVANA_BASE_DIR="${HAVANA_BASE_DIR:=/data/havana}"
 export DEFAULT_SCRIPTS_PATH="/data/scripts"
 
 export HAVANA_DISABLE_SERVER=$(echo "${HAVANA_DISABLE_SERVER:-false}" | tr '[:upper:]' '[:lower:]')
-export HAVANA_DISABLE_WEBSERVER=$(echo "${HAVANA_DISABLE_WEBSERVER:-false}" | tr '[:upper]' '[:lower]')
+export HAVANA_DISABLE_WEBSERVER=$(echo "${HAVANA_DISABLE_WEBSERVER:-false}" | tr '[:upper:]' '[:lower:]')
 
 # Run Havana initial setup
 if ! "$DEFAULT_SCRIPTS_PATH/havana-setup"; then
