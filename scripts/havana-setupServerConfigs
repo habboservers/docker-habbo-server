@@ -3,7 +3,7 @@
 # Source the validation script
 source "$(dirname "$0")/havana-validateEnv.sh"
 
-echo "[level:INFO][docker-habbo-server] Generating configuration file..."
+echo "[level:INFO][docker-habbo-server] Checking configuration..."
 
 # Get configs from environment variables or set default values
 : "${HABBO_SERVER_IP_BIND:=127.0.0.1}"
@@ -35,15 +35,13 @@ if ! validate_env_vars "${required_vars[@]}"; then
     exit 1
 fi
 
-# Define paths for configuration and state files
-CONFIG_FILE="$HAVANA_BASE_DIR/server.ini"
-STATE_FILE="/tmp/havana_server_config_state"
-
 # Check if configs must be updated
-if ! check_file_state "$CONFIG_FILE" "$STATE_FILE"; then
+if ! check_env_state "server"; then
     echo "[level:INFO][docker-habbo-server] Configuration unchanged, skipping generation"
     exit 0
 fi
+
+echo "[level:INFO][docker-habbo-server] Generating configuration file..."
 
 # Generate the .ini file directly
 cat <<EOF > $HAVANA_BASE_DIR/server.ini
@@ -79,4 +77,4 @@ log.sent.packets = $HABBO_SERVER_LOG_SENT_PACKETS
 debug = $HABBO_SERVER_DEBUG
 EOF
 
-echo "[level:INFO][docker-habbo-server] Configuration file generated"
+echo "[level:INFO][docker-habbo-server] Configuration file generated successfully"

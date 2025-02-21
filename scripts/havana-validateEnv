@@ -1,35 +1,42 @@
 #!/bin/bash
 
 # Generate a hash based on the existing configuration file
-generate_file_hash() {
-    local config_file=$1
+generate_env_hash() {
+    local config_type=$1
+    local prefix
 
-    if [ ! -f "$config_file" ]; then
-        # If the file doesn't exist, return a hash for an empty state
-        echo "empty" | sha256sum | cut -d' ' -f1
-    else
-        # Generate a hash of the file's content
-        sha256sum "$config_file" | cut -d' ' -f1
-    fi
+    case "$config_type" in
+        "server")
+            prefix="HABBO_SERVER_|HABBO_DATABASE_"
+            ;;
+        "webserver")
+            prefix="HABBO_WEBSERVER_|HABBO_DATABASE_"
+            ;;
+        *)
+            echo "[level:ERROR][docker-havana] Invalid config type: $config_type" >&2
+            return 1
+            ;;
+    esac
+
+    # Get all environment variables matching the prefix pattern
+    env | grep -E "^($prefix)" | sort | sha256sum | cut -d' ' -f1
 }
 
 # Check if the configuration file needs to be updated
-check_file_state() {
-    local config_file=$1
-    local state_file=$2
+check_env_state() {
+    local config_type=$1
+    local state_file="/tmp/havana_${config_type}_env_state"
 
     # Generate the current hash of the configuration file
     local current_hash
-    current_hash=$(generate_file_hash "$config_file")
+    current_hash=$(generate_env_hash "$config_type")
 
-    # Compare with the stored hash
     if [ -f "$state_file" ] && [ "$(cat "$state_file")" = "$current_hash" ]; then
-        return 1  # No update needed
+        return 1  # No changes
     fi
 
-    # Save the new hash to the state file
     echo "$current_hash" > "$state_file"
-    return 0  # Update needed
+    return 0  # Changes detected
 }
 
 # Validate environment variables
