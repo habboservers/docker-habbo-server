@@ -15,7 +15,7 @@ jobs:
       contents: write
       pull-requests: write
     outputs:
-      tag: ${{ steps.version_info.outputs.tag }}
+      tag: ${{ steps.create_new_version.outputs.version }}
 
     steps:
       - name: Check user permissions
