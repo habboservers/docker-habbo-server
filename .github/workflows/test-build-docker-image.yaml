@@ -66,18 +66,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5.6.1
-        with:
-          images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-            vitorvasc/docker-habbo-server
-          tags: |
-            type=raw,value=${{ steps.version.outputs.version }}
-          flavor: |
-            latest=false
-
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6.13.0
@@ -86,5 +74,6 @@ jobs:
           file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            vitorvasc/docker-habbo-server:${{ steps.version.outputs.version }}
