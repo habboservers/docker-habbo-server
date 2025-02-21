@@ -1,0 +1,60 @@
+#!/bin/bash
+
+export HAVANA_BASE_DIR="${HAVANA_BASE_DIR:=/data/havana}"
+export DEFAULT_SCRIPTS_PATH="/data/scripts"
+
+export HAVANA_DISABLE_SERVER=$(echo "${HAVANA_DISABLE_SERVER:-false}" | tr '[:upper:]' '[:lower:]')
+export HAVANA_DISABLE_WEBSERVER=$(echo "${HAVANA_DISABLE_WEBSERVER:-false}" | tr '[:upper:]' '[:lower:]')
+
+# Run Havana initial setup
+if ! "$DEFAULT_SCRIPTS_PATH/havana-setup"; then
+    echo "[level:ERROR][docker-havana-web] ERROR: Havana setup failed!" >&2
+    exit 1
+fi
+
+# Source the havana variables if the file exists
+if [ -f /tmp/havana_vars.env ]; then
+    . /tmp/havana_vars.env
+fi
+
+cd ${HAVANA_BASE_DIR}
+
+# Check if the web server is disabled
+if [ "$HAVANA_DISABLE_WEBSERVER" != "true" ]; then
+    # Check if HAVANA_WEB_START_SCRIPT is set
+    if [ -z "$HAVANA_WEB_START_SCRIPT" ]; then
+        echo "[level:ERROR][docker-havana-web] ERROR: HAVANA_WEB_START_SCRIPT is not set!" >&2
+        exit 1
+    else
+        # Run run_web.sh in background
+        echo "[level:INFO][docker-havana-web] Starting Web Server..."
+        sh "$HAVANA_WEB_START_SCRIPT" &
+        WEB_PID=$!
+    fi
+fi
+
+# Check if the server is disabled
+if [ "$HAVANA_DISABLE_SERVER" != "true" ]; then
+    # Check if HAVANA_SERVER_START_SCRIPT is set
+    if [ -z "$HAVANA_SERVER_START_SCRIPT" ]; then
+        echo "[level:ERROR][docker-havana-server] HAVANA_SERVER_START_SCRIPT is not set!" >&2
+        exit 1
+    else
+        # Run run_server.sh in background
+        echo "[level:INFO][docker-havana-server] Starting Game Server..."
+        sh "$HAVANA_SERVER_START_SCRIPT" &
+        SERVER_PID=$!
+    fi
+fi
+
+WAIT_PIDS=""
+if [ -n "$WEB_PID" ]; then
+    WAIT_PIDS="$WEB_PID"
+fi
+if [ -n "$SERVER_PID" ]; then
+    WAIT_PIDS="${WAIT_PIDS:+$WAIT_PIDS }$SERVER_PID"
+fi
+
+if [ -n "$WAIT_PIDS" ]; then
+    wait $WAIT_PIDS
+fi

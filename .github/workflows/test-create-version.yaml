@@ -14,6 +14,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      tag: ${{ steps.create_new_version.outputs.version }}
 
     steps:
       - name: Check user permissions
@@ -42,6 +44,7 @@ jobs:
           git config user.email "actions@github.com"
 
       - name: Create new version
+        id: create_new_version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.inputs.pull_request_number }}
@@ -56,62 +59,56 @@ jobs:
           git fetch origin $PR_BRANCH
           git checkout $PR_BRANCH
 
-          # Get current version
-          CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          # Sanitize branch name (remove special characters and convert to lowercase)
+          BRANCH_NAME=$(echo $PR_BRANCH | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
 
-          # Remove 'v' prefix and any branch suffix
-          CURRENT_VERSION=$(echo $CURRENT_VERSION | sed 's/v$.*$-.*-test/\1/')
-          CURRENT_VERSION=${CURRENT_VERSION#v}
+          # Fetch all tags
+          git fetch --tags
+
+          # Get the latest version number for the current branch
+          LATEST_VERSION=$(git tag --list "v*-${BRANCH_NAME}-test" | sed 's/v\([0-9.]*\).*/\1/' | sort -V | tail -n 1)
+
+          # Set default version if no tags exist
+          if [[ -z "$LATEST_VERSION" ]]; then
+              CURRENT_VERSION="0.0.0"
+          else
+              CURRENT_VERSION=$LATEST_VERSION
+          fi
 
           # Split version into components
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
-          # Calculate new version based on input type
-          case $VERSION_TYPE in
-            major)
-              NEW_VERSION="$((MAJOR + 1)).0.0"
-              ;;
-            minor)
-              NEW_VERSION="${MAJOR}.$((MINOR + 1)).0"
-              ;;
-            patch)
-              NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
-              ;;
-          esac
-
-          # Sanitize branch name (remove special characters and convert to lowercase)
-          BRANCH_NAME=$(echo $PR_BRANCH | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
+          # Always increment patch version
+          NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
 
           # Create new version with branch name
           FULL_VERSION="${NEW_VERSION}-${BRANCH_NAME}-test"
           NEW_TAG="v${FULL_VERSION}"
 
-          # Create version commit and tag
-          echo $FULL_VERSION > VERSION
-          git add VERSION
-          git commit -m "chore: bump version to $FULL_VERSION"
+          # Check if tag already exists
+          if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
+            echo "Tag $NEW_TAG already exists. Incrementing version..."
+            PATCH=$((PATCH + 1))
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+            FULL_VERSION="${NEW_VERSION}-${BRANCH_NAME}-test"
+            NEW_TAG="v${FULL_VERSION}"
+          fi
+
+          # Create tag
           git tag -a $NEW_TAG -m "$NEW_TAG"
 
-          # Push changes back to PR branch
-          git push origin $PR_BRANCH --follow-tags
+          # Push tag back to PR branch
+          git push origin $NEW_TAG
 
           echo "Created new version: $FULL_VERSION"
           echo "version=$FULL_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Save tag as artifact
-        run: echo "${{ steps.version.outputs.version }}" > tag.txt
-      
-      - name: Upload tag artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tag
-          path: tag.txt
-
       - name: Update PR with version info
+        id: version_info
         uses: actions/github-script@v7
         with:
           script: |
-            const newVersion = require('fs').readFileSync('VERSION', 'utf8').trim();
+            const newVersion = '${{ steps.create_new_version.outputs.version }}';
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -120,7 +117,22 @@ jobs:
               body: `🏷️ New version generated: v${newVersion}`
             });
 
+            core.setOutput('tag', newVersion)
+
       - name: Report status
         if: ${{ success() }}
         run: |
           echo "Pipeline executed successfully."
+
+  build_docker:
+    name: Build Docker Image
+    needs: create_version
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/test-build-docker-image.yaml
+    with:
+      tag: ${{ needs.create_version.outputs.tag }}
+    secrets: inherit

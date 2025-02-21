@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Source the validation script
+source "$(dirname "$0")/havana-validateEnv"
+
+echo "[level:INFO][docker-havana-web] Checking configuration..."
+
 # Set default values for environment variables if they are not already set
 : "${HABBO_WEBSERVER_SITE_NAME:=Habbo}"
 : "${HABBO_WEBSERVER_SITE_PATH:=http://localhost}"
@@ -35,8 +40,28 @@
 : "${HABBO_WEBSERVER_EMAIL_SMTP_FROM_EMAIL:=}"
 : "${HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME:=}"
 
+# Validate required environment variables
+required_vars=(
+    "HABBO_DATABASE_HOST"
+    "HABBO_DATABASE_PORT"
+    "HABBO_DATABASE_USERNAME"
+    "HABBO_DATABASE_PASSWORD"
+    "HABBO_DATABASE_NAME"
+)
+if ! validate_env_vars "${required_vars[@]}"; then
+    exit 1
+fi
+
+# Check if configuration needs to be updated
+if ! check_env_state "webserver"; then
+    echo "[level:INFO][docker-havana-web] Configuration unchanged, skipping generation"
+    exit 0
+fi
+
+echo "[level:INFO][docker-habbo-server] Generating configuration file..."
+
 # Generate the .ini file directly
-cat <<EOF > /data/webserver-config.ini
+cat <<EOF > $HAVANA_BASE_DIR/webserver-config.ini
 [Site]
 site.name = $HABBO_WEBSERVER_SITE_NAME
 site.path = $HABBO_WEBSERVER_SITE_PATH
@@ -79,4 +104,4 @@ email.smtp.from.name = $HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME
 
 EOF
 
-echo "[level:INFO][docker-habbo-web] Configuration file generated"
+echo "[level:INFO][docker-havana-web] Configuration file generated successfully"

@@ -1,0 +1,116 @@
+#!/bin/bash
+
+# Function to validate environment variables
+validate_environment() {
+    local required_vars=("HAVANA_BASE_DIR" "DEFAULT_SCRIPTS_PATH")
+    local missing_vars=()
+
+    for var in "${required_vars[@]}"; do
+        if [ -z "${!var}" ]; then
+            missing_vars+=("$var")
+        fi
+    done
+
+    if [ ${#missing_vars[@]} -ne 0 ]; then
+        echo "[level:ERROR][docker-havana-web] Missing required environment variables: ${missing_vars[*]}" >&2
+        return 1
+    fi
+
+    return 0
+}
+
+# Function to setup web server script
+setup_web_script() {
+    local script_path="${HAVANA_BASE_DIR}/run_web.sh"
+    
+    # Validate script existence
+    if [ ! -f "$script_path" ]; then
+        echo "[level:ERROR][docker-havana-web] Web start script not found at: $script_path" >&2
+        return 1
+    fi
+
+    # Make script executable
+    if [ ! -x "$script_path" ]; then
+        echo "[level:INFO][docker-havana-web] Making web start script executable"
+        chmod +x "$script_path"
+    fi
+
+    # Export script path for other processes
+    echo "HAVANA_WEB_START_SCRIPT=${script_path}" >> /tmp/havana_vars.env
+    
+    return 0
+}
+
+# Function to backup existing configurations
+backup_configs() {
+    local config_dir="${HAVANA_BASE_DIR}/config"
+    local backup_dir="${HAVANA_BASE_DIR}/config_backups"
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+
+    if [ -d "$config_dir" ]; then
+        mkdir -p "$backup_dir"
+        if tar -czf "${backup_dir}/config_backup_${timestamp}.tar.gz" -C "$config_dir" .; then
+            echo "[level:INFO][docker-havana-web] Configuration backup created at: ${backup_dir}/config_backup_${timestamp}.tar.gz"
+            return 0
+        else
+            echo "[level:WARN][docker-havana-web] Failed to create configuration backup" >&2
+            return 1
+        fi
+    fi
+    
+    return 0
+}
+
+# Function to verify web server configuration
+verify_web_config() {
+    local config_file="${HAVANA_BASE_DIR}/webserver-config.ini"
+    
+    if [ ! -f "$config_file" ]; then
+        echo "[level:ERROR][docker-havana-web] Web configuration file not found after setup" >&2
+        return 1
+    fi
+
+    return 0
+}
+
+# Main setup process
+main() {
+    echo "[level:INFO][docker-havana-web] Starting web server setup..."
+
+    # Validate environment
+    if ! validate_environment; then
+        echo "[level:ERROR][docker-havana-web] Environment validation failed" >&2
+        return 1
+    fi
+
+    # Backup existing configurations
+    if ! backup_configs; then
+        echo "[level:WARN][docker-havana-web] Configuration backup failed, proceeding anyway..."
+    fi
+
+    # Setup web server script
+    if ! setup_web_script; then
+        echo "[level:ERROR][docker-havana-web] Failed to setup web server script" >&2
+        return 1
+    fi
+
+    # Generate web server configuration
+    echo "[level:INFO][docker-havana-web] Generating web server configuration..."
+    if ! "$DEFAULT_SCRIPTS_PATH/havana-setupWebServerConfigs"; then
+        echo "[level:ERROR][docker-havana-web] Failed to create web server configuration" >&2
+        return 1
+    fi
+
+    # Verify configuration
+    if ! verify_web_config; then
+        echo "[level:ERROR][docker-havana-web] Web server configuration verification failed" >&2
+        return 1
+    fi
+
+    echo "[level:INFO][docker-havana-web] Web server setup completed successfully"
+    return 0
+}
+
+# Run main function
+main "$@"
+exit $?

@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Generate a hash based on the existing configuration file
+generate_env_hash() {
+    local config_type=$1
+    local prefix
+
+    case "$config_type" in
+        "server")
+            prefix="HABBO_SERVER_|HABBO_DATABASE_"
+            ;;
+        "webserver")
+            prefix="HABBO_WEBSERVER_|HABBO_DATABASE_"
+            ;;
+        *)
+            echo "[level:ERROR][docker-havana] Invalid config type: $config_type" >&2
+            return 1
+            ;;
+    esac
+
+    # Get all environment variables matching the prefix pattern
+    env | grep -E "^($prefix)" | sort | sha256sum | cut -d' ' -f1
+}
+
+# Check if the configuration file needs to be updated
+check_env_state() {
+    local config_type=$1
+    local state_file="/tmp/havana_${config_type}_env_state"
+
+    # Generate the current hash of the configuration file
+    local current_hash
+    current_hash=$(generate_env_hash "$config_type")
+
+    if [ -f "$state_file" ] && [ "$(cat "$state_file")" = "$current_hash" ]; then
+        return 1  # No changes
+    fi
+
+    echo "$current_hash" > "$state_file"
+    return 0  # Changes detected
+}
+
+# Validate environment variables
+validate_env_vars() {
+    local required_vars=("$@")
+    local missing_vars=()
+
+    for var in "${required_vars[@]}"; do
+        if [ -z "${!var}" ]; then
+            missing_vars+=("$var")
+        fi
+    done
+
+    if [ ${#missing_vars[@]} -ne 0 ]; then
+        echo "[level:ERROR][docker-havana] Missing required environment variables: ${missing_vars[*]}" >&2
+        return 1
+    fi
+
+    return 0
+}
+
+# If script is run directly, show usage
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    echo "This script is meant to be sourced by other scripts."
+    echo "Usage: source $(basename "${BASH_SOURCE[0]}")"
+    exit 1
+fi

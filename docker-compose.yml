@@ -1,6 +1,9 @@
 services:
   habbo-server:
-    image: vitorvasc/docker-habbo-server
+    # image: vitorvasc/docker-habbo-server
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: habbo-server
     ports:
       - "80:80"
