@@ -6,12 +6,6 @@ on:
       tag:
         required: true
         type: string
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to build (e.g., v1.0.0)'
-        required: true
-        type: string
 
 env:
   REGISTRY: ghcr.io
