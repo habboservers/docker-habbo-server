@@ -36,7 +36,6 @@ services:
       HABBO_DATABASE_USERNAME: "havana"
       HABBO_DATABASE_PASSWORD: "havana"
       HABBO_DATABASE_NAME: "havana"
-      HABBO_WEBSERVER_STATIC_CONTENT_PATH: "https://cdn.habboservers.com/havana"
 
 volumes:
   habboserver_data:

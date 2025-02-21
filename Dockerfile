@@ -4,7 +4,8 @@ RUN apk add --no-cache \
     curl \
     unzip \
     bash \
-    jq
+    jq \
+    font-manager
 
 WORKDIR /data
 
