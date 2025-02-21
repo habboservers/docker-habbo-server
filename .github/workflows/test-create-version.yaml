@@ -14,6 +14,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      tag: ${{ steps.version_info.outputs.tag }}
 
     steps:
       - name: Check user permissions
@@ -98,16 +100,8 @@ jobs:
           echo "Created new version: $FULL_VERSION"
           echo "version=$FULL_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Save tag as artifact
-        run: echo "${{ steps.version.outputs.version }}" > tag.txt
-      
-      - name: Upload tag artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: tag
-          path: tag.txt
-
       - name: Update PR with version info
+        id: version_info
         uses: actions/github-script@v7
         with:
           script: |
@@ -120,7 +114,22 @@ jobs:
               body: `🏷️ New version generated: v${newVersion}`
             });
 
+            core.setOutput('tag', newVersion)
+
       - name: Report status
         if: ${{ success() }}
         run: |
           echo "Pipeline executed successfully."
+
+  build_docker:
+    name: Build Doker Image
+    needs: version_info
+    permissions:
+      packages: write
+      contents: read
+      id-token: write
+      attestations: write
+    uses: ./../.github/workflows/test-build-docker-image.yaml
+    with:
+      tag: ${{ needs.version_info.outputs.tag }}
+    secrets: inherit

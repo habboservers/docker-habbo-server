@@ -1,10 +1,11 @@
 name: Test - Build Docker image
 
 on:
-  workflow_run:
-    workflows: ['Test - Create Version']
-    types:
-      - completed
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       tag:
