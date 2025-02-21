@@ -1,0 +1,39 @@
+#!/bin/bash
+
+: "${HAVANA_RELEASE_VERSION:=latest}"
+: "${HAVANA_GITHUB_REPOSITORY:=Quackster/Havana}"
+
+# Search and download assets for latest release version
+if [[ $HAVANA_RELEASE_VERSION ]]; then
+    ASSET_URL=$(curl -s https://api.github.com/repos/${HAVANA_GITHUB_REPOSITORY}/releases/latest | jq -r '.assets[0].browser_download_url')
+    if [[ $ASSET_URL ]]; then
+        curl -fsL -o havana.zip "${ASSET_URL}" &&
+            # mkdir ${HAVANA_BASE_DIR} &&
+            unzip havana.zip -d ${HAVANA_BASE_DIR} && 
+            rm havana.zip
+    fi
+fi
+
+# The environment variable `HAVANA_DISABLE_WEBSERVER` can be set to `true` 
+# if you want to disable the webserver.
+if [ "$HAVANA_DISABLE_WEBSERVER" != "true" ]; then
+    echo "[level:INFO][docker-havana-web] Running Web Server setup..."
+    if "$DEFAULT_SCRIPTS_PATH/havana-setupWebServer"; then
+        echo "[level:INFO][docker-havana-web] Web Server setup executed successfully."
+    else
+        echo "[level:ERROR][docker-havana-web] ERROR: Web Server setup failed!" >&2
+        exit 1
+    fi
+fi
+
+# The environment variable `HAVANA_DISABLE_SERVER` can be set to `true` 
+# if you want to disable the server.
+if [ "$HAVANA_DISABLE_SERVER" != "true" ]; then
+    echo "[level:INFO][docker-havana-server] Running Server setup..."
+    if "$DEFAULT_SCRIPTS_PATH/havana-setupServer"; then
+        echo "[level:INFO][docker-havana-server] Server setup executed successfully."
+    else
+        echo "[level:ERROR][docker-havana-server] ERROR: Server setup failed!" >&2
+        exit 1
+    fi
+fi

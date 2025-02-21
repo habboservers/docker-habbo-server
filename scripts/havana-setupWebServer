@@ -1,0 +1,22 @@
+#!/bin/bash
+
+HAVANA_WEB_START_SCRIPT="${HAVANA_BASE_DIR}/run_web.sh" &&
+    echo "HAVANA_WEB_START_SCRIPT=${HAVANA_WEB_START_SCRIPT}" >> /tmp/havana_vars.env
+
+# Check if the script exists and is executable
+if [ ! -f "$HAVANA_WEB_START_SCRIPT" ]; then
+    echo "[level:ERROR][docker-havana-web] ERROR: Web start script not found at: $HAVANA_WEB_START_SCRIPT" >&2
+    exit 1
+fi
+
+# Make run_web.sh executable, if needed
+if [ ! -x "$HAVANA_WEB_START_SCRIPT" ]; then
+    echo "[level:INFO][docker-havana-web] Making web start script executable"
+    chmod +x "$HAVANA_WEB_START_SCRIPT"
+fi
+
+# Generate web server configuration file
+if ! "$DEFAULT_SCRIPTS_PATH/havana-setupWebServerConfigs"; then 
+    echo "[level:ERROR][docker-havana-web] ERROR: Could not create web server configuration file"
+    exit 1
+fi

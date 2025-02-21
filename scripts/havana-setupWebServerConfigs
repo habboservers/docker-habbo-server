@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "[level:INFO][docker-havana-web] Generating configuration file..."
+
 # Set default values for environment variables if they are not already set
 : "${HABBO_WEBSERVER_SITE_NAME:=Habbo}"
 : "${HABBO_WEBSERVER_SITE_PATH:=http://localhost}"
@@ -36,7 +38,7 @@
 : "${HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME:=}"
 
 # Generate the .ini file directly
-cat <<EOF > /data/webserver-config.ini
+cat <<EOF > $HAVANA_BASE_DIR/webserver-config.ini
 [Site]
 site.name = $HABBO_WEBSERVER_SITE_NAME
 site.path = $HABBO_WEBSERVER_SITE_PATH
@@ -79,4 +81,4 @@ email.smtp.from.name = $HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME
 
 EOF
 
-echo "[level:INFO][docker-habbo-web] Configuration file generated"
+echo "[level:INFO][docker-havana-web] Configuration file generated successfully."

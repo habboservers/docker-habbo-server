@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Set default values for environment variables if they are not already set
+echo "[level:INFO][docker-habbo-server] Generating configuration file..."
 
+# Get configs from environment variables or set default values
 : "${HABBO_SERVER_IP_BIND:=127.0.0.1}"
 : "${HABBO_SERVER_PORT:=12321}"
 : "${HABBO_SERVER_LIMIT_BANDWIDTH:=false}"
@@ -13,7 +14,7 @@
 : "${HABBO_DATABASE_HOST:=127.0.0.1}"
 : "${HABBO_DATABASE_PORT:=3306}"
 : "${HABBO_DATABASE_USERNAME:=havana}"
-: "${HABBO_DATABASE_PASSWORD:=changeme}" # Default value
+: "${HABBO_DATABASE_PASSWORD:=changeme}"
 : "${HABBO_DATABASE_NAME:=havana}"
 : "${HABBO_SERVER_LOG_RECEIVED_PACKETS:=false}"
 : "${HABBO_SERVER_LOG_SENT_PACKETS:=false}"
@@ -53,4 +54,4 @@ log.sent.packets = $HABBO_SERVER_LOG_SENT_PACKETS
 debug = $HABBO_SERVER_DEBUG
 EOF
 
-echo "[level:INFO][docker-habbo-web] Configuration file generated"
+echo "[level:INFO][docker-habbo-server] Configuration file generated"
