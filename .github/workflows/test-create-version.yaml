@@ -44,6 +44,7 @@ jobs:
           git config user.email "actions@github.com"
 
       - name: Create new version
+        id: create_new_version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.inputs.pull_request_number }}
@@ -64,14 +65,14 @@ jobs:
           # Fetch all tags
           git fetch --tags
 
-          # Get the latest tag for the current branch
-          LATEST_TAG=$(git tag --list "v*-*-${BRANCH_NAME}-test" | sort -V | tail -n 1)
+          # Get the latest version number for the current branch
+          LATEST_VERSION=$(git tag --list "v*-${BRANCH_NAME}-test" | sed 's/v\([0-9.]*\).*/\1/' | sort -V | tail -n 1)
 
-          # Extract the version number from the latest tag or default to v0.0.0
-          if [[ -z "$LATEST_TAG" ]]; then
+          # Set default version if no tags exist
+          if [[ -z "$LATEST_VERSION" ]]; then
               CURRENT_VERSION="0.0.0"
           else
-              CURRENT_VERSION=$(echo $LATEST_TAG | sed 's/v\([0-9.]*\)-.*/\1/')
+              CURRENT_VERSION=$LATEST_VERSION
           fi
 
           # Split version into components
@@ -83,6 +84,15 @@ jobs:
           # Create new version with branch name
           FULL_VERSION="${NEW_VERSION}-${BRANCH_NAME}-test"
           NEW_TAG="v${FULL_VERSION}"
+
+          # Check if tag already exists
+          if git rev-parse "$NEW_TAG" >/dev/null 2>&1; then
+            echo "Tag $NEW_TAG already exists. Incrementing version..."
+            PATCH=$((PATCH + 1))
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+            FULL_VERSION="${NEW_VERSION}-${BRANCH_NAME}-test"
+            NEW_TAG="v${FULL_VERSION}"
+          fi
 
           # Create tag
           git tag -a $NEW_TAG -m "$NEW_TAG"
