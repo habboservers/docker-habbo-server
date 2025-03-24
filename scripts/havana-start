@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export HAVANA_BASE_DIR="${HAVANA_BASE_DIR:=/data/havana}"
-export DEFAULT_SCRIPTS_PATH="/data/scripts"
+export HAVANA_BASE_DIR="/opt/havana"
+export DEFAULT_SCRIPTS_PATH="/opt/scripts"
 
 export HAVANA_DISABLE_SERVER=$(echo "${HAVANA_DISABLE_SERVER:-false}" | tr '[:upper:]' '[:lower:]')
 export HAVANA_DISABLE_WEBSERVER=$(echo "${HAVANA_DISABLE_WEBSERVER:-false}" | tr '[:upper:]' '[:lower:]')
@@ -9,6 +9,7 @@ export HAVANA_DISABLE_WEBSERVER=$(echo "${HAVANA_DISABLE_WEBSERVER:-false}" | tr
 # Run Havana initial setup
 if ! "$DEFAULT_SCRIPTS_PATH/havana-setup"; then
     echo "[level:ERROR][docker-havana-web] ERROR: Havana setup failed!" >&2
+    tail -f /dev/null
     exit 1
 fi
 
@@ -58,3 +59,5 @@ fi
 if [ -n "$WAIT_PIDS" ]; then
     wait $WAIT_PIDS
 fi
+
+tail -f /dev/null
