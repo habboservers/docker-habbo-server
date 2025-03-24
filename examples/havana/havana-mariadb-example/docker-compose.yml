@@ -18,13 +18,17 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - habboservers
 
   habbo-server:
     image: vitorvasc/docker-habbo-server:latest
     container_name: habbo-server
     ports:
       - "80:80" # Map port 80 used on the web server
-      - "12321:12321" # Map port 12321 used on the game server
+      - "12321:12321" # Map port 12321 used on the Shockwavegame server
+      - "12322:12322" # Map port 12322 used on the Multi User Server (MUS)
+      - "12323:12323" # Map port 12323 used on the Flash game server
     volumes:
       - habboserver_data:/data
     depends_on:

@@ -19,6 +19,23 @@ extract_repository() {
     echo "$identifier" | cut -d'@' -f1
 }
 
+# Function to fix nested Havana directory structure
+fix_directory_structure() {
+    local base_dir=$1
+    # Check if files were extracted to a nested Havana directory
+    if [ -d "${base_dir}/Havana" ]; then
+        echo "[level:WARN][docker-havana] Detected nested Havana directory, fixing structure..."
+        # Move all contents from nested directory to base_dir
+        mv "${base_dir}/Havana"/* "${base_dir}/" 2>/dev/null
+        mv "${base_dir}/Havana"/.* "${base_dir}/" 2>/dev/null || true
+        # Remove the empty Havana directory
+        rmdir "${base_dir}/Havana"
+        echo "[level:INFO][docker-havana] Directory structure fixed"
+        return 0
+    fi
+    return 0
+}
+
 # Function to get latest release version
 get_latest_version() {
     local version=$(curl -s "https://api.github.com/repos/${HAVANA_GITHUB_REPOSITORY}/releases/latest" | jq -r '.tag_name')
@@ -47,8 +64,10 @@ install_havana() {
     local ASSET_URL=$(curl -s "https://api.github.com/repos/${repository}/releases/latest" | jq -r '.assets[0].browser_download_url')
     if [[ $ASSET_URL ]]; then
         if curl -fsL -o havana.zip "${ASSET_URL}" &&
-           unzip -o havana.zip -d "${HAVANA_BASE_DIR}" && 
-           rm havana.zip; then
+           unzip -o havana.zip -d "${HAVANA_BASE_DIR}"; then
+            # Fix directory structure if needed
+            fix_directory_structure "${HAVANA_BASE_DIR}"
+            rm havana.zip
             echo "$version_identifier" > "/tmp/havana_version"
             echo "[level:INFO][docker-havana] Successfully installed from $repository | version: $version"
             return 0
