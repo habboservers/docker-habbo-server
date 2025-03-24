@@ -1,15 +1,26 @@
 services:
   habbo-server:
-    # image: vitorvasc/docker-habbo-server
     build:
       context: .
       dockerfile: Dockerfile
     container_name: habbo-server
     ports:
       - "80:80"
+      - "12321:12321"
+      - "12322:12322"
+      - "12323:12323"
     environment:
       HABBO_DATABASE_HOST: "habbo-database"
       HABBO_DATABASE_PORT: "3306"
       HABBO_DATABASE_USERNAME: "havana"
       HABBO_DATABASE_PASSWORD: "havana"
       HABBO_DATABASE_NAME: "havana"
+      HABBO_SERVER_LOG_RECEIVED_PACKETS: "true"
+      HABBO_SERVER_LOG_SENT_PACKETS: "true"
+      HABBO_SERVER_DEBUG: "true"
+    networks:
+      - habboservers
+
+networks:
+  habboservers:
+    external: true

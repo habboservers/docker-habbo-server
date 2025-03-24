@@ -18,6 +18,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    networks:
+      - habboservers
 
   habbo-server:
     image: vitorvasc/docker-habbo-server:latest
@@ -41,3 +43,7 @@ services:
 volumes:
   habboserver_data:
   mariadb_data:
+
+networks:
+  habboservers:
+    external: true
