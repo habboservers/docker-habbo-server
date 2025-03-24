@@ -1,12 +1,13 @@
 services:
   habbo-server:
-    # image: vitorvasc/docker-habbo-server
     build:
       context: .
       dockerfile: Dockerfile
     container_name: habbo-server
     ports:
       - "80:80"
+      - "12321:12321"
+      - "12323:12323"
     environment:
       HABBO_DATABASE_HOST: "habbo-database"
       HABBO_DATABASE_PORT: "3306"
