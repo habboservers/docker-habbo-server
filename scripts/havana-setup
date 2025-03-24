@@ -59,6 +59,7 @@ install_havana() {
     local version=$(extract_version "$version_identifier")
     local repository=$(extract_repository "$version_identifier")
     echo "[level:INFO][docker-havana] Downloading from repository: $repository | version: $version"
+    echo "[level:DEBUG][docker-havana] Downloading version '$version' from repository '$repository'"
     
     local ASSET_URL=$(curl -s "https://api.github.com/repos/${repository}/releases/latest" | jq -r '.assets[0].browser_download_url')
     if [[ $ASSET_URL ]]; then
