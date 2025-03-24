@@ -15,12 +15,4 @@ services:
       HABBO_DATABASE_USERNAME: "havana"
       HABBO_DATABASE_PASSWORD: "havana"
       HABBO_DATABASE_NAME: "havana"
-      HABBO_SERVER_LOG_RECEIVED_PACKETS: "true"
-      HABBO_SERVER_LOG_SENT_PACKETS: "true"
-      HABBO_SERVER_DEBUG: "true"
-    networks:
-      - habboservers
-
-networks:
-  habboservers:
-    external: true
+      
