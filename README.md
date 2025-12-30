@@ -31,8 +31,9 @@ get our server up and running by just following a few steps.
 #### Settings
 
 To change one of the following variables, you can pass the updated value through an environment variable. Visit
-the [havana-mariadb-example](https://github.com/habboservers/docker-habbo-server/blob/0.0.6/examples/havana/havana-mariadb-example/docker-compose.yml)
-for more details.
+the [havana-mariadb-example] for more details.
+
+[havana-mariadb-example]: https://github.com/habboservers/docker-habbo-server/tree/main/examples/havana/havana-mariadb-example
 
 #### Database settings
 
