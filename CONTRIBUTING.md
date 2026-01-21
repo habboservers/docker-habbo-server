@@ -10,7 +10,7 @@ make setup-dev
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```text
 <type>[optional scope]: <description>
 
 [optional body]
@@ -20,7 +20,7 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 Examples:
 
-```
+```text
 feat: add health check endpoint
 fix: resolve memory leak in config parser
 docs: update installation instructions

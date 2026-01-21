@@ -9,15 +9,25 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- 
+- Non-root user (UID 1000) in Dockerfile for improved security
+- OCI-compliant image labels with build args (BUILD_DATE, VERSION, VCS_REF)
+- Environment variable references in docker-compose files
+- Resource limits (memory) in docker-compose files
+- `.env.example` template for environment configuration
+- `scripts/lib/common.sh` with shared logging and validation functions
+- `CONTRIBUTING.md` with contribution guidelines
+- `.editorconfig` for consistent code style
+- CI workflow with shellcheck, hadolint, yamllint, markdownlint
 
 ### Changed
 
-- 
+- Shell scripts hardened with `set -euo pipefail` and proper variable quoting
+- Makefile updated to support `docker-compose.override.yml` auto-detection
+- `.gitignore` updated to exclude `.env` files and logs
 
 ### Removed
 
-- 
+-
 
 ## [1.0.3] - 28 Jan 2025
 
