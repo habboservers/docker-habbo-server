@@ -58,7 +58,7 @@ jobs:
 
       - name: Extract metadata for release version
         id: meta
-        uses: docker/metadata-action@v5.6.1
+        uses: docker/metadata-action@v5.10.0
         with:
           images: vitorvasc/docker-habbo-server
           tags: |
