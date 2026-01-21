@@ -33,7 +33,7 @@ jobs:
           echo "Processed version: $VERSION"
 
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ steps.version.outputs.tag }}
 
