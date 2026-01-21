@@ -32,7 +32,7 @@ jobs:
               repo: context.repo.repo,
               username: context.actor
             });
-            
+
             if (!['admin', 'write'].includes(permission.permission)) {
               core.setFailed('Only repository maintainers can trigger this workflow');
               return;
@@ -55,13 +55,13 @@ jobs:
         run: |
           # Get current version
           CURRENT_VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          
+
           # Remove 'v' prefix
           CURRENT_VERSION=${CURRENT_VERSION#v}
-          
+
           # Split version into components
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
-          
+
           # Calculate new version based on input type
           case $VERSION_TYPE in
             major)
@@ -74,16 +74,16 @@ jobs:
               NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
               ;;
           esac
-          
+
           # Create new version tag
           NEW_TAG="v${NEW_VERSION}"
-          
+
           # Create version commit and tag
           echo $NEW_VERSION > VERSION
           git add VERSION
           git commit -m "chore: bump version to $NEW_VERSION"
           git tag -a $NEW_TAG -m "Release $NEW_TAG"
-          
+
           # Push changes back to main branch
           git push origin main --follow-tags
 
@@ -118,7 +118,7 @@ jobs:
   build_docker:
     name: Build Docker Image
     needs: create_version
-    permissions: 
+    permissions:
       packages: write
       contents: read
       id-token: write

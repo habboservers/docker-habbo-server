@@ -11,6 +11,7 @@ LABEL org.opencontainers.image.created="${BUILD_DATE}" \
       org.opencontainers.image.description="Docker image for running Habbo Servers effortlessly" \
       org.opencontainers.image.documentation="https://github.com/habboservers/docker-habbo-server/tree/main/docs"
 
+# hadolint ignore=DL3018
 RUN apk add --no-cache \
     curl \
     unzip \

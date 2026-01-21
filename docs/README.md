@@ -127,7 +127,7 @@ If you encounter any issues:
 2. Verify all environment variables are set correctly
 3. Ensure all required ports are available and not blocked
 4. Visit our [GitHub repository](https://github.com/habboservers/docker-habbo-server) for more information
-5. Join our [Discord server](https://discord.gg/m2FHK6Vtqz)for support
+5. Join our [Discord server](https://discord.gg/m2FHK6Vtqz) for support
 
 ## Maintenance
 
@@ -144,4 +144,4 @@ docker compose up -d
 ```bash
 # Backup database
 docker compose exec -T habbo-database mysqldump -u havana -phavana havana > backup.sql
-``` 
+```

@@ -119,4 +119,4 @@ docker compose up -d
 ```bash
 # Backup database
 docker compose exec -T habbo-database mysqldump -u havana -phavana havana > backup.sql
-``` 
+```

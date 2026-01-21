@@ -39,9 +39,9 @@ fresh: ## Remove volumes and start fresh (runs DB init scripts)
 
 ##@ Development
 
-lint: ## Lint shell scripts (requires shellcheck)
-	@command -v shellcheck >/dev/null 2>&1 || { echo "shellcheck not installed. Install with: brew install shellcheck"; exit 1; }
-	shellcheck scripts/havana-*
+lint: ## Run all linters via pre-commit
+	@command -v pre-commit >/dev/null 2>&1 || { echo "pre-commit not installed. Install with: pip install pre-commit"; exit 1; }
+	pre-commit run --all-files
 
 validate: ## Run validation checks
 	@echo "Validating Dockerfile..."
