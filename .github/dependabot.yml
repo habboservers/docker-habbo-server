@@ -5,15 +5,35 @@
 
 version: 2
 updates:
+  # Docker
   - package-ecosystem: 'docker'
     directory: '/'
     schedule:
       interval: 'daily'
+    commit-message:
+      prefix: 'chore(docker)'
+    labels:
+      - 'dependencies'
+      - 'docker'
+
+  # Docker Compose
   - package-ecosystem: 'docker-compose'
     directory: '/'
     schedule:
       interval: 'daily'
+    commit-message:
+      prefix: 'chore(compose)'
+    labels:
+      - 'dependencies'
+      - 'docker-compose'
+
+  # GitHub Actions
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'daily'
+    commit-message:
+      prefix: 'ci(actions)'
+    labels:
+      - 'dependencies'
+      - 'github-actions'
