@@ -1,4 +1,4 @@
-.PHONY: help build build-no-cache up down logs shell restart \
+.PHONY: help build build-no-cache up down logs shell restart fresh \
         lint validate version version-bump-patch version-bump-minor version-bump-major \
         clean prune
 
@@ -32,6 +32,10 @@ shell: ## Shell into running container
 
 restart: ## Restart containers
 	docker compose restart
+
+fresh: ## Remove volumes and start fresh (runs DB init scripts)
+	docker compose down -v
+	docker compose up -d
 
 ##@ Development
 
