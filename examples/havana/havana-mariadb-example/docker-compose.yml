@@ -2,11 +2,12 @@ services:
   habbo-database:
     image: mariadb
     container_name: habbo-database
+    restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: pass
-      MARIADB_DATABASE: havana
-      MARIADB_USER: havana
-      MARIADB_PASSWORD: havana
+      MARIADB_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD:-changeme}"
+      MARIADB_DATABASE: "${HABBO_DATABASE_NAME:-havana}"
+      MARIADB_USER: "${HABBO_DATABASE_USERNAME:-havana}"
+      MARIADB_PASSWORD: "${HABBO_DATABASE_PASSWORD:-changeme}"
     ports:
       - "3306:3306"
     volumes:
@@ -20,27 +21,47 @@ services:
       retries: 3
     networks:
       - habboservers
+    # Resource limits (adjust based on your environment)
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
 
   habbo-server:
     image: vitorvasc/docker-habbo-server:latest
     container_name: habbo-server
+    restart: unless-stopped
     ports:
-      - "80:80" # Map port 80 used on the web server
-      - "12321:12321" # Map port 12321 used on the Shockwavegame server
-      - "12322:12322" # Map port 12322 used on the Multi User Server (MUS)
-      - "12323:12323" # Map port 12323 used on the Flash game server
+      - "80:80"
+      - "12321:12321"
+      - "12322:12322"
+      - "12323:12323"
     volumes:
       - habboserver_data:/data
     depends_on:
       habbo-database:
         condition: service_healthy
     environment:
-      HABBO_DATABASE_HOST: "habbo-database"
-      HABBO_DATABASE_PORT: "3306"
-      HABBO_DATABASE_USERNAME: "havana"
-      HABBO_DATABASE_PASSWORD: "havana"
-      HABBO_DATABASE_NAME: "havana"
-      HABBO_WEBSERVER_STATIC_CONTENT_PATH: "https://cdn.habboservers.com/havana"
+      HABBO_DATABASE_HOST: "${HABBO_DATABASE_HOST:-habbo-database}"
+      HABBO_DATABASE_PORT: "${HABBO_DATABASE_PORT:-3306}"
+      HABBO_DATABASE_USERNAME: "${HABBO_DATABASE_USERNAME:-havana}"
+      HABBO_DATABASE_PASSWORD: "${HABBO_DATABASE_PASSWORD:-changeme}"
+      HABBO_DATABASE_NAME: "${HABBO_DATABASE_NAME:-havana}"
+      HABBO_WEBSERVER_STATIC_CONTENT_PATH: "${HABBO_WEBSERVER_STATIC_CONTENT_PATH:-https://cdn.habboservers.com/havana}"
+    networks:
+      - habboservers
+    # Resource limits (adjust based on your environment)
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+
+networks:
+  habboservers:
 
 volumes:
   habboserver_data:

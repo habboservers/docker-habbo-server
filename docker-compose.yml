@@ -4,15 +4,22 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: habbo-server
+    restart: unless-stopped
     ports:
       - "80:80"
       - "12321:12321"
       - "12322:12322"
       - "12323:12323"
     environment:
-      HABBO_DATABASE_HOST: "habbo-database"
-      HABBO_DATABASE_PORT: "3306"
-      HABBO_DATABASE_USERNAME: "havana"
-      HABBO_DATABASE_PASSWORD: "havana"
-      HABBO_DATABASE_NAME: "havana"
-      
+      HABBO_DATABASE_HOST: "${HABBO_DATABASE_HOST:-habbo-database}"
+      HABBO_DATABASE_PORT: "${HABBO_DATABASE_PORT:-3306}"
+      HABBO_DATABASE_USERNAME: "${HABBO_DATABASE_USERNAME:-havana}"
+      HABBO_DATABASE_PASSWORD: "${HABBO_DATABASE_PASSWORD:-changeme}"
+      HABBO_DATABASE_NAME: "${HABBO_DATABASE_NAME:-havana}"
+    # Resource limits (adjust based on your environment)
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
