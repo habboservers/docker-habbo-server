@@ -9,7 +9,7 @@ updates:
   - package-ecosystem: 'docker'
     directory: '/'
     schedule:
-      interval: 'daily'
+      interval: 'weekly'
     commit-message:
       prefix: 'chore(docker)'
     labels:
@@ -20,7 +20,7 @@ updates:
   - package-ecosystem: 'docker-compose'
     directory: '/'
     schedule:
-      interval: 'daily'
+      interval: 'weekly'
     commit-message:
       prefix: 'chore(compose)'
     labels:
@@ -31,7 +31,7 @@ updates:
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: 'daily'
+      interval: 'weekly'
     commit-message:
       prefix: 'ci(actions)'
     labels:
