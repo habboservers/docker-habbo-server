@@ -6,7 +6,6 @@
 IMAGE_NAME := docker-habbo-server
 CONTAINER_NAME := habbo-server
 VERSION_FILE := VERSION
-COMPOSE_FILE := docker-compose.yml
 
 # Default target
 .DEFAULT_GOAL := help
@@ -20,19 +19,19 @@ build-no-cache: ## Build Docker image without cache
 	docker build --no-cache -t $(IMAGE_NAME):latest .
 
 up: ## Start containers (docker-compose up -d)
-	docker compose -f $(COMPOSE_FILE) up -d
+	docker compose up -d
 
 down: ## Stop containers
-	docker compose -f $(COMPOSE_FILE) down
+	docker compose down
 
 logs: ## Tail container logs
-	docker compose -f $(COMPOSE_FILE) logs -f
+	docker compose logs -f
 
 shell: ## Shell into running container
 	docker exec -it $(CONTAINER_NAME) /bin/bash
 
 restart: ## Restart containers
-	docker compose -f $(COMPOSE_FILE) restart
+	docker compose restart
 
 ##@ Development
 
@@ -44,7 +43,7 @@ validate: ## Run validation checks
 	@echo "Validating Dockerfile..."
 	@docker build --check . 2>/dev/null || echo "Note: --check requires Docker BuildKit"
 	@echo "Validating docker-compose.yml..."
-	docker compose -f $(COMPOSE_FILE) config --quiet
+	docker compose config --quiet
 	@echo "Validation complete."
 
 ##@ Versioning
@@ -82,7 +81,7 @@ version-bump-major: ## Bump major version (X.0.0)
 ##@ Cleanup
 
 clean: ## Remove stopped containers and dangling images
-	docker compose -f $(COMPOSE_FILE) down --remove-orphans
+	docker compose down --remove-orphans
 	docker image prune -f
 
 prune: ## Docker system prune (removes all unused data)
