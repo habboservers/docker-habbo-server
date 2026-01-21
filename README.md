@@ -1,3 +1,5 @@
+# Docker Habbo Server
+
 <p align="center">
   <a href="#">
     <img src="docs/banner.gif" alt="#SaveHabboHotel">
@@ -10,10 +12,11 @@
 [![Discord](https://img.shields.io/discord/1323397952680759326?label=Discord&logo=discord)](https://discord.gg/m2FHK6Vtqz)
 [![Build and Publish](https://github.com/habboservers/docker-habbo-server/actions/workflows/release-create-version.yaml/badge.svg)](https://github.com/habboservers/docker-habbo-server/actions/workflows/release-create-version.yaml)
 
-# 👋 Getting started
+## 👋 Getting started
 
-Help us #SaveHabboHotel! This Docker Image provides a quick setup for your Habbo Hotel server, providing the necessary
-configurations to run a Habbo Hotel Web Server alongside with an Emulator.
+Help us #SaveHabboHotel! This Docker Image provides a quick setup for your Habbo
+Hotel server, providing the necessary configurations to run a Habbo Hotel Web
+Server alongside with an Emulator.
 
 Join our Discord: [https://discord.gg/m2FHK6Vtqz](https://discord.gg/m2FHK6Vtqz)
 
@@ -25,19 +28,22 @@ This image currently supports the following versions:
 
 ### v31 - Quackster/Havana
 
-Big thanks for [@Quackster](https://github.com/Quackster) on creating and maintaining this awesome project, so we can
-get our server up and running by just following a few steps.
+Big thanks for [@Quackster](https://github.com/Quackster) on creating and
+maintaining this awesome project, so we can get our server up and running by
+just following a few steps.
 
 #### Settings
 
-To change one of the following variables, you can pass the updated value through an environment variable. Visit
-the [havana-mariadb-example] for more details.
+To change one of the following variables, you can pass the updated value through
+an environment variable. Visit the [havana-mariadb-example] for more details.
 
-[havana-mariadb-example]: https://github.com/habboservers/docker-habbo-server/tree/main/examples/havana/havana-mariadb-example
+[havana-mariadb-example]:
+  https://github.com/habboservers/docker-habbo-server/tree/main/examples/havana/havana-mariadb-example
 
 #### Database settings
 
-The database settings applies for both server and web configurations. The values can be configured using the following environment variables:
+The database settings applies for both server and web configurations. The values
+can be configured using the following environment variables:
 
 | Env                       | Default value | Applies to   |
 | ------------------------- | ------------- | ------------ |
@@ -64,29 +70,30 @@ The database settings applies for both server and web configurations. The values
 
 #### Web settings
 
-| Env                                             | Default value         | Applies to |
-| ----------------------------------------------- | --------------------- | ---------- |
-| `HABBO_WEBSERVER_SITE_NAME`                     | Habbo                 | Web        |
-| `HABBO_WEBSERVER_SITE_PATH`                     | http://localhost      | Web        |
-| `HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT`         | http://localhost:5000 | Web        |
-| `HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT_TIMEOUT` | 30000                 | Web        |
-| `HABBO_WEBSERVER_SITE_DIRECTORY`                | tools/www             | Web        |
-| `HABBO_WEBSERVER_STATIC_CONTENT_PATH`           | http://localhost      | Web        |
-| `HABBO_WEBSERVER_MAINTENANCE`                   | false                 | Web        |
-| `HABBO_WEBSERVER_PAGE_ENCODING`                 | utf-8                 | Web        |
-| `HABBO_WEBSERVER_IP_BIND`                       | 127.0.0.1             | Web        |
-| `HABBO_WEBSERVER_PORT`                          | 80                    | Web        |
-| `HABBO_WEBSERVER_TEMPLATE_DIRECTORY`            | tools/www-tpl         | Web        |
-| `HABBO_WEBSERVER_TEMPLATE_NAME`                 | default-en            | Web        |
-| `HABBO_WEBSERVER_EMAIL_SMTP_ENABLE`             | false                 | Web        |
-| `HABBO_WEBSERVER_EMAIL_STATIC_CONTENT_PATH`     | http://localhost      | Web        |
-| `HABBO_WEBSERVER_EMAIL_SMTP_HOST`               | _(no value)_          | Web        |
-| `HABBO_WEBSERVER_EMAIL_SMTP_PORT`               | 465                   | Web        |
-| `HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_USERNAME`     | _(no value)_          | Web        |
-| `HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_PASSWORD`     | _(no value)_          | Web        |
-| `HABBO_WEBSERVER_EMAIL_SMTP_FROM_EMAIL`         | _(no value)_          | Web        |
-| `HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME`          | _(no value)_          | Web        |
+| Env                                             | Default value           | Applies to |
+| ----------------------------------------------- | ----------------------- | ---------- |
+| `HABBO_WEBSERVER_SITE_NAME`                     | Habbo                   | Web        |
+| `HABBO_WEBSERVER_SITE_PATH`                     | <http://localhost>      | Web        |
+| `HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT`         | <http://localhost:5000> | Web        |
+| `HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT_TIMEOUT` | 30000                   | Web        |
+| `HABBO_WEBSERVER_SITE_DIRECTORY`                | tools/www               | Web        |
+| `HABBO_WEBSERVER_STATIC_CONTENT_PATH`           | <http://localhost>      | Web        |
+| `HABBO_WEBSERVER_MAINTENANCE`                   | false                   | Web        |
+| `HABBO_WEBSERVER_PAGE_ENCODING`                 | utf-8                   | Web        |
+| `HABBO_WEBSERVER_IP_BIND`                       | 127.0.0.1               | Web        |
+| `HABBO_WEBSERVER_PORT`                          | 80                      | Web        |
+| `HABBO_WEBSERVER_TEMPLATE_DIRECTORY`            | tools/www-tpl           | Web        |
+| `HABBO_WEBSERVER_TEMPLATE_NAME`                 | default-en              | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_ENABLE`             | false                   | Web        |
+| `HABBO_WEBSERVER_EMAIL_STATIC_CONTENT_PATH`     | <http://localhost>      | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_HOST`               | _(no value)_            | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_PORT`               | 465                     | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_USERNAME`     | _(no value)_            | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_PASSWORD`     | _(no value)_            | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_FROM_EMAIL`         | _(no value)_            | Web        |
+| `HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME`          | _(no value)_            | Web        |
 
 ## 🦺 Help us keep the Habbo Hotel alive
 
-If you feel like you can contribute with this project, feel free to open an [Issue](https://github.com/habboservers/docker-habbo-server/issues)!
+If you feel like you can contribute with this project, feel free to open an
+[Issue](https://github.com/habboservers/docker-habbo-server/issues)!
