@@ -9,15 +9,18 @@ This guide will help you set up and run your own Habbo server using Docker conta
 ### 1. Install Docker and Docker Compose
 
 #### For Windows:
+
 1. Download and install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop)
 2. During installation, ensure WSL 2 is enabled if prompted
 3. Start Docker Desktop after installation
 
 #### For macOS:
+
 1. Download and install [Docker Desktop for Mac](https://www.docker.com/products/docker-desktop)
 2. Start Docker Desktop after installation
 
 #### For Linux (Ubuntu/Debian):
+
 ```bash
 # Install Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -32,7 +35,9 @@ sudo usermod -aG docker $USER
 ```
 
 ### 2. Verify Installation
+
 Open a terminal/command prompt and run:
+
 ```bash
 docker --version
 docker compose version
@@ -41,12 +46,14 @@ docker compose version
 ## Setting Up Your Habbo Server
 
 ### 1. Create Project Directory
+
 ```bash
 mkdir my-habbo-server
 cd my-habbo-server
 ```
 
 ### 2. Create Docker Compose File
+
 Copy the example `docker-compose.yml` from our [examples/havana/havana-mariadb-example](../examples/havana/havana-mariadb-example/docker-compose.yml) directory to your project folder. This file contains all the necessary configurations for both the database and Habbo server.
 
 ```bash
@@ -55,6 +62,7 @@ curl -o docker-compose.yml https://raw.githubusercontent.com/habboservers/docker
 ```
 
 ### 3. Start the Services
+
 ```bash
 docker compose up -d
 ```
@@ -65,13 +73,13 @@ docker compose up -d
 
 The Habbo server container supports the following environment variables:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| HABBO_DATABASE_HOST | Database host | habbo-database |
-| HABBO_DATABASE_PORT | Database port | 3306 |
-| HABBO_DATABASE_USERNAME | Database username | havana |
-| HABBO_DATABASE_PASSWORD | Database password | havana |
-| HABBO_DATABASE_NAME | Database name | havana |
+| Variable                            | Description            | Default                             |
+| ----------------------------------- | ---------------------- | ----------------------------------- |
+| HABBO_DATABASE_HOST                 | Database host          | habbo-database                      |
+| HABBO_DATABASE_PORT                 | Database port          | 3306                                |
+| HABBO_DATABASE_USERNAME             | Database username      | havana                              |
+| HABBO_DATABASE_PASSWORD             | Database password      | havana                              |
+| HABBO_DATABASE_NAME                 | Database name          | havana                              |
 | HABBO_WEBSERVER_STATIC_CONTENT_PATH | Path to static content | https://cdn.habboservers.com/havana |
 
 ## Accessing Your Server
@@ -107,6 +115,7 @@ If you encounter any issues:
 ## Maintenance
 
 ### Updating the Server
+
 ```bash
 # Pull latest images
 docker compose pull
@@ -116,6 +125,7 @@ docker compose up -d
 ```
 
 ### Backup
+
 ```bash
 # Backup database
 docker compose exec -T habbo-database mysqldump -u havana -phavana havana > backup.sql
