@@ -1,91 +1,96 @@
 #!/bin/bash
+set -euo pipefail
 
 : "${HAVANA_RELEASE_VERSION:=latest}"
 : "${HAVANA_GITHUB_REPOSITORY:=habboservers/Havana}"
 
 # Create the version identifier based on repository / version
 create_version_identifier() {
-    local version=$1
-    echo "${HAVANA_GITHUB_REPOSITORY}@${version}"
+  local version=$1
+  echo "${HAVANA_GITHUB_REPOSITORY}@${version}"
 }
 
 extract_version() {
-    local identifier=$1
-    echo "$identifier" | cut -d'@' -f2
+  local identifier=$1
+  echo "$identifier" | cut -d'@' -f2
 }
 
 extract_repository() {
-    local identifier=$1
-    echo "$identifier" | cut -d'@' -f1
+  local identifier=$1
+  echo "$identifier" | cut -d'@' -f1
 }
 
 # Function to fix nested Havana directory structure
 fix_directory_structure() {
-    local base_dir=$1
-    # Check if files were extracted to a nested Havana directory
-    if [ -d "${base_dir}/Havana" ]; then
-        echo "[level:WARN][docker-havana] Detected nested Havana directory, fixing structure..."
-        # Move all contents from nested directory to base_dir
-        mv "${base_dir}/Havana"/* "${base_dir}/" 2>/dev/null
-        mv "${base_dir}/Havana"/.* "${base_dir}/" 2>/dev/null || true
-        # Remove the empty Havana directory
-        rmdir "${base_dir}/Havana"
-        echo "[level:INFO][docker-havana] Directory structure fixed"
-        return 0
-    fi
+  local base_dir=$1
+  # Check if files were extracted to a nested Havana directory
+  if [ -d "${base_dir}/Havana" ]; then
+    echo "[level:WARN][docker-havana] Detected nested Havana directory, fixing structure..."
+    # Move all contents from nested directory to base_dir
+    mv "${base_dir}/Havana"/* "${base_dir}/" 2>/dev/null || true
+    mv "${base_dir}/Havana"/.* "${base_dir}/" 2>/dev/null || true
+    # Remove the empty Havana directory
+    rmdir "${base_dir}/Havana"
+    echo "[level:INFO][docker-havana] Directory structure fixed"
     return 0
+  fi
+  return 0
 }
 
 # Function to get latest release version
 get_latest_version() {
-    local version=$(curl -s "https://api.github.com/repos/${HAVANA_GITHUB_REPOSITORY}/releases/latest" | jq -r '.tag_name')
-    if [ -n "$version" ]; then
-        create_version_identifier "$version"
-    fi
+  local version
+  version=$(curl -s "https://api.github.com/repos/${HAVANA_GITHUB_REPOSITORY}/releases/latest" | jq -r '.tag_name')
+  if [ -n "$version" ]; then
+    create_version_identifier "$version"
+  fi
 }
 
 # Function to get current installed version
 get_installed_version() {
-    if [ -f "/tmp/havana_version" ]; then
-        cat "/tmp/havana_version"
-    else
-        echo "none"
-    fi
+  if [ -f "/tmp/havana_version" ]; then
+    cat "/tmp/havana_version"
+  else
+    echo "none"
+  fi
 }
 
 # Function to download and install Havana
 install_havana() {
-    local version_identifier=$1
-    local version=$(extract_version "$version_identifier")
-    local repository=$(extract_repository "$version_identifier")
-    echo "[level:INFO][docker-havana] Downloading from repository: $repository | version: $version"
-    echo "[level:DEBUG][docker-havana] Downloading version '$version' from repository '$repository'"
-    
-    local ASSET_URL=$(curl -s "https://api.github.com/repos/${repository}/releases/latest" | jq -r '.assets[0].browser_download_url')
-    if [[ $ASSET_URL ]]; then
-        if curl -fsL -o havana.zip "${ASSET_URL}" &&
-           unzip -o havana.zip -d "${HAVANA_BASE_DIR}"; then
-            # Fix directory structure if needed
-            fix_directory_structure "${HAVANA_BASE_DIR}"
-            rm havana.zip
-            echo "$version_identifier" > "/tmp/havana_version"
-            echo "[level:INFO][docker-havana] Successfully installed from $repository | version: $version"
-            return 0
-        else
-            echo "[level:ERROR][docker-havana] Failed to install from $repository | version: $version" >&2
-            return 1
-        fi
+  local version_identifier=$1
+  local version
+  local repository
+  version=$(extract_version "$version_identifier")
+  repository=$(extract_repository "$version_identifier")
+  echo "[level:INFO][docker-havana] Downloading from repository: $repository | version: $version"
+  echo "[level:DEBUG][docker-havana] Downloading version '$version' from repository '$repository'"
+
+  local ASSET_URL
+  ASSET_URL=$(curl -s "https://api.github.com/repos/${repository}/releases/latest" | jq -r '.assets[0].browser_download_url')
+  if [[ -n "$ASSET_URL" && "$ASSET_URL" != "null" ]]; then
+    if curl -fsL -o havana.zip "${ASSET_URL}" &&
+       unzip -o havana.zip -d "${HAVANA_BASE_DIR}"; then
+      # Fix directory structure if needed
+      fix_directory_structure "${HAVANA_BASE_DIR}"
+      rm havana.zip
+      echo "$version_identifier" > "/tmp/havana_version"
+      echo "[level:INFO][docker-havana] Successfully installed from $repository | version: $version"
+      return 0
     else
-        echo "[level:ERROR][docker-havana] Failed to get download URL for $repository | version: $version" >&2
-        return 1
+      echo "[level:ERROR][docker-havana] Failed to install from $repository | version: $version" >&2
+      return 1
     fi
+  else
+    echo "[level:ERROR][docker-havana] Failed to get download URL for $repository | version: $version" >&2
+    return 1
+  fi
 }
 
 # Get latest version from GitHub
 LATEST_VERSION_IDENTIFIER=$(get_latest_version)
 if [ -z "$LATEST_VERSION_IDENTIFIER" ]; then
-    echo "[level:ERROR][docker-havana] Failed to get latest version information" >&2
-    exit 1
+  echo "[level:ERROR][docker-havana] Failed to get latest version information" >&2
+  exit 1
 fi
 
 # Get currently installed version
@@ -97,45 +102,45 @@ echo "[level:INFO][docker-havana] Current version identifier: $CURRENT_VERSION_I
 
 # Check if we need to install/upgrade
 if [ "$CURRENT_VERSION_IDENTIFIER" = "none" ] || [ "$CURRENT_VERSION_IDENTIFIER" != "$LATEST_VERSION_IDENTIFIER" ]; then
-    echo "[level:INFO][docker-havana] New version detected, installing/upgrading..."
-    if ! install_havana "$LATEST_VERSION_IDENTIFIER"; then
-        echo "[level:ERROR][docker-havana] Installation/upgrade failed!" >&2
-        exit 1
-    fi
+  echo "[level:INFO][docker-havana] New version detected, installing/upgrading..."
+  if ! install_havana "$LATEST_VERSION_IDENTIFIER"; then
+    echo "[level:ERROR][docker-havana] Installation/upgrade failed!" >&2
+    exit 1
+  fi
 fi
 
 # Setup Web Server if not disabled
-if [ "$HAVANA_DISABLE_WEBSERVER" != "true" ]; then
-    if [ ! -f "/tmp/havana_web_setup_complete" ] || \
-       [ "$(cat "/tmp/havana_web_setup_complete")" != "$LATEST_VERSION_IDENTIFIER" ]; then
-        echo "[level:INFO][docker-havana-web] Running Web Server setup..."
-        if "$DEFAULT_SCRIPTS_PATH/havana-setupWebServer"; then
-            echo "[level:INFO][docker-havana-web] Web Server setup executed successfully."
-            echo "$LATEST_VERSION_IDENTIFIER" > "/tmp/havana_web_setup_complete"
-        else
-            echo "[level:ERROR][docker-havana-web] Web Server setup failed!" >&2
-            exit 1
-        fi
+if [ "${HAVANA_DISABLE_WEBSERVER:-false}" != "true" ]; then
+  if [ ! -f "/tmp/havana_web_setup_complete" ] || \
+     [ "$(cat "/tmp/havana_web_setup_complete")" != "$LATEST_VERSION_IDENTIFIER" ]; then
+    echo "[level:INFO][docker-havana-web] Running Web Server setup..."
+    if "$DEFAULT_SCRIPTS_PATH/havana-setupWebServer"; then
+      echo "[level:INFO][docker-havana-web] Web Server setup executed successfully."
+      echo "$LATEST_VERSION_IDENTIFIER" > "/tmp/havana_web_setup_complete"
+    else
+      echo "[level:ERROR][docker-havana-web] Web Server setup failed!" >&2
+      exit 1
     fi
-    
-    # Always check and update configurations if needed
-    "$DEFAULT_SCRIPTS_PATH/havana-setupWebServerConfigs"
+  fi
+
+  # Always check and update configurations if needed
+  "$DEFAULT_SCRIPTS_PATH/havana-setupWebServerConfigs"
 fi
 
 # Setup Game Server if not disabled
-if [ "$HAVANA_DISABLE_SERVER" != "true" ]; then
-    if [ ! -f "/tmp/havana_server_setup_complete" ] || \
-       [ "$(cat "/tmp/havana_server_setup_complete")" != "$LATEST_VERSION_IDENTIFIER" ]; then
-        echo "[level:INFO][docker-havana-server] Running Server setup..."
-        if "$DEFAULT_SCRIPTS_PATH/havana-setupServer"; then
-            echo "[level:INFO][docker-havana-server] Server setup executed successfully."
-            echo "$LATEST_VERSION_IDENTIFIER" > "/tmp/havana_server_setup_complete"
-        else
-            echo "[level:ERROR][docker-havana-server] Server setup failed!" >&2
-            exit 1
-        fi
+if [ "${HAVANA_DISABLE_SERVER:-false}" != "true" ]; then
+  if [ ! -f "/tmp/havana_server_setup_complete" ] || \
+     [ "$(cat "/tmp/havana_server_setup_complete")" != "$LATEST_VERSION_IDENTIFIER" ]; then
+    echo "[level:INFO][docker-havana-server] Running Server setup..."
+    if "$DEFAULT_SCRIPTS_PATH/havana-setupServer"; then
+      echo "[level:INFO][docker-havana-server] Server setup executed successfully."
+      echo "$LATEST_VERSION_IDENTIFIER" > "/tmp/havana_server_setup_complete"
+    else
+      echo "[level:ERROR][docker-havana-server] Server setup failed!" >&2
+      exit 1
     fi
-    
-    # Always check and update configurations if needed
-    "$DEFAULT_SCRIPTS_PATH/havana-setupServerConfigs"
+  fi
+
+  # Always check and update configurations if needed
+  "$DEFAULT_SCRIPTS_PATH/havana-setupServerConfigs"
 fi
