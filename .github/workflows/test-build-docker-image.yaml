@@ -26,7 +26,7 @@ jobs:
         run: |
           TAG="${{ inputs.tag }}"
           VERSION="${TAG#v}"  # Remove 'v' prefix
-                  
+
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "Selected tag: $TAG"
@@ -63,7 +63,7 @@ jobs:
           images: vitorvasc/docker-habbo-server
           tags: |
             type=raw,value=${{ steps.version.outputs.version }}
-      
+
       - name: Build and push Docker image
         id: push
         uses: docker/build-push-action@v6.13.0

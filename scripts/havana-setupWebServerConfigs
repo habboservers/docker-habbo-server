@@ -1,6 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
 # Source the validation script
+# shellcheck source=havana-validateEnv
 source "$(dirname "$0")/havana-validateEnv"
 
 echo "[level:INFO][docker-havana-web] Checking configuration..."
@@ -22,7 +24,7 @@ echo "[level:INFO][docker-havana-web] Checking configuration..."
 : "${HABBO_DATABASE_HOST:=127.0.0.1}"
 : "${HABBO_DATABASE_PORT:=3306}"
 : "${HABBO_DATABASE_USERNAME:=havana}"
-: "${HABBO_DATABASE_PASSWORD:=changeme}" # Default value
+: "${HABBO_DATABASE_PASSWORD:=changeme}"
 : "${HABBO_DATABASE_NAME:=havana}"
 
 : "${HABBO_WEBSERVER_IP_BIND:=127.0.0.1}"
@@ -42,65 +44,65 @@ echo "[level:INFO][docker-havana-web] Checking configuration..."
 
 # Validate required environment variables
 required_vars=(
-    "HABBO_DATABASE_HOST"
-    "HABBO_DATABASE_PORT"
-    "HABBO_DATABASE_USERNAME"
-    "HABBO_DATABASE_PASSWORD"
-    "HABBO_DATABASE_NAME"
+  "HABBO_DATABASE_HOST"
+  "HABBO_DATABASE_PORT"
+  "HABBO_DATABASE_USERNAME"
+  "HABBO_DATABASE_PASSWORD"
+  "HABBO_DATABASE_NAME"
 )
 if ! validate_env_vars "${required_vars[@]}"; then
-    exit 1
+  exit 1
 fi
 
 # Check if configuration needs to be updated
 if ! check_env_state "webserver"; then
-    echo "[level:INFO][docker-havana-web] Configuration unchanged, skipping generation"
-    exit 0
+  echo "[level:INFO][docker-havana-web] Configuration unchanged, skipping generation"
+  exit 0
 fi
 
 echo "[level:INFO][docker-habbo-server] Generating configuration file..."
 
 # Generate the .ini file directly
-cat <<EOF > $HAVANA_BASE_DIR/webserver-config.ini
+cat <<EOF > "${HAVANA_BASE_DIR}/webserver-config.ini"
 [Site]
-site.name = $HABBO_WEBSERVER_SITE_NAME
-site.path = $HABBO_WEBSERVER_SITE_PATH
-site.imaging.endpoint = $HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT
-site.imaging.endpoint.timeout = $HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT_TIMEOUT
-site.directory = $HABBO_WEBSERVER_SITE_DIRECTORY
-static.content.path = $HABBO_WEBSERVER_STATIC_CONTENT_PATH
-maintenance = $HABBO_WEBSERVER_MAINTENANCE
-registration.disabled = $HABBO_WEBSERVER_REGISTRATION_DISABLED
-page.encoding = $HABBO_WEBSERVER_PAGE_ENCODING
+site.name = ${HABBO_WEBSERVER_SITE_NAME}
+site.path = ${HABBO_WEBSERVER_SITE_PATH}
+site.imaging.endpoint = ${HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT}
+site.imaging.endpoint.timeout = ${HABBO_WEBSERVER_SITE_IMAGING_ENDPOINT_TIMEOUT}
+site.directory = ${HABBO_WEBSERVER_SITE_DIRECTORY}
+static.content.path = ${HABBO_WEBSERVER_STATIC_CONTENT_PATH}
+maintenance = ${HABBO_WEBSERVER_MAINTENANCE}
+registration.disabled = ${HABBO_WEBSERVER_REGISTRATION_DISABLED}
+page.encoding = ${HABBO_WEBSERVER_PAGE_ENCODING}
 
 [Template]
-template.directory = $HABBO_WEBSERVER_TEMPLATE_DIRECTORY
-template.name = $HABBO_WEBSERVER_TEMPLATE_NAME
+template.directory = ${HABBO_WEBSERVER_TEMPLATE_DIRECTORY}
+template.name = ${HABBO_WEBSERVER_TEMPLATE_NAME}
 
 [Database]
-mysql.hostname = $HABBO_DATABASE_HOST
-mysql.port = $HABBO_DATABASE_PORT
-mysql.username = $HABBO_DATABASE_USERNAME
-mysql.password = $HABBO_DATABASE_PASSWORD
-mysql.database = $HABBO_DATABASE_NAME
+mysql.hostname = ${HABBO_DATABASE_HOST}
+mysql.port = ${HABBO_DATABASE_PORT}
+mysql.username = ${HABBO_DATABASE_USERNAME}
+mysql.password = ${HABBO_DATABASE_PASSWORD}
+mysql.database = ${HABBO_DATABASE_NAME}
 
 [Global]
-bind.ip = $HABBO_WEBSERVER_IP_BIND
-bind.port = $HABBO_WEBSERVER_PORT
+bind.ip = ${HABBO_WEBSERVER_IP_BIND}
+bind.port = ${HABBO_WEBSERVER_PORT}
 
 [Rcon]
-rcon.ip = $HABBO_SERVER_RCON_IP_BIND
-rcon.port = $HABBO_SERVER_RCON_PORT
+rcon.ip = ${HABBO_SERVER_RCON_IP_BIND}
+rcon.port = ${HABBO_SERVER_RCON_PORT}
 
 [SMTP]
-email.smtp.enable = $HABBO_WEBSERVER_EMAIL_SMTP_ENABLE
-email.static.content.path = $HABBO_WEBSERVER_EMAIL_STATIC_CONTENT_PATH
-email.smtp.host = $HABBO_WEBSERVER_EMAIL_SMTP_HOST
-email.smtp.port = $HABBO_WEBSERVER_EMAIL_SMTP_PORT
-email.smtp.login.username = $HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_USERNAME
-email.smtp.login.password = $HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_PASSWORD
-email.smtp.from.email = $HABBO_WEBSERVER_EMAIL_SMTP_FROM_EMAIL
-email.smtp.from.name = $HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME
+email.smtp.enable = ${HABBO_WEBSERVER_EMAIL_SMTP_ENABLE}
+email.static.content.path = ${HABBO_WEBSERVER_EMAIL_STATIC_CONTENT_PATH}
+email.smtp.host = ${HABBO_WEBSERVER_EMAIL_SMTP_HOST}
+email.smtp.port = ${HABBO_WEBSERVER_EMAIL_SMTP_PORT}
+email.smtp.login.username = ${HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_USERNAME}
+email.smtp.login.password = ${HABBO_WEBSERVER_EMAIL_SMTP_LOGIN_PASSWORD}
+email.smtp.from.email = ${HABBO_WEBSERVER_EMAIL_SMTP_FROM_EMAIL}
+email.smtp.from.name = ${HABBO_WEBSERVER_EMAIL_SMTP_FROM_NAME}
 
 EOF
 

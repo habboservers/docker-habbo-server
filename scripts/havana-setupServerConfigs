@@ -1,6 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
 # Source the validation script
+# shellcheck source=havana-validateEnv
 source "$(dirname "$0")/havana-validateEnv"
 
 echo "[level:INFO][docker-habbo-server] Checking configuration..."
@@ -25,56 +27,56 @@ echo "[level:INFO][docker-habbo-server] Checking configuration..."
 
 # Validate required environment variables
 required_vars=(
-    "HABBO_DATABASE_HOST"
-    "HABBO_DATABASE_PORT"
-    "HABBO_DATABASE_USERNAME"
-    "HABBO_DATABASE_PASSWORD"
-    "HABBO_DATABASE_NAME"
+  "HABBO_DATABASE_HOST"
+  "HABBO_DATABASE_PORT"
+  "HABBO_DATABASE_USERNAME"
+  "HABBO_DATABASE_PASSWORD"
+  "HABBO_DATABASE_NAME"
 )
 if ! validate_env_vars "${required_vars[@]}"; then
-    exit 1
+  exit 1
 fi
 
 # Check if configs must be updated
 if ! check_env_state "server"; then
-    echo "[level:INFO][docker-habbo-server] Configuration unchanged, skipping generation"
-    exit 0
+  echo "[level:INFO][docker-habbo-server] Configuration unchanged, skipping generation"
+  exit 0
 fi
 
 echo "[level:INFO][docker-habbo-server] Generating configuration file..."
 
 # Generate the .ini file directly
-cat <<EOF > $HAVANA_BASE_DIR/server.ini
+cat <<EOF > "${HAVANA_BASE_DIR}/server.ini"
 [Global]
-server.bind = $HABBO_SERVER_IP_BIND
-server.port = $HABBO_SERVER_PORT
+server.bind = ${HABBO_SERVER_IP_BIND}
+server.port = ${HABBO_SERVER_PORT}
 
 [Server]
-server.port = $HABBO_SERVER_PORT
-server.limit.bandwidth = $HABBO_SERVER_LIMIT_BANDWIDTH
-server.limit.bandwidth.amount = $HABBO_SERVER_LIMIT_BANDWIDTH_AMOUNT
+server.port = ${HABBO_SERVER_PORT}
+server.limit.bandwidth = ${HABBO_SERVER_LIMIT_BANDWIDTH}
+server.limit.bandwidth.amount = ${HABBO_SERVER_LIMIT_BANDWIDTH_AMOUNT}
 
 [Rcon]
-rcon.bind = $HABBO_SERVER_RCON_IP_BIND
-rcon.port = $HABBO_SERVER_RCON_PORT
+rcon.bind = ${HABBO_SERVER_RCON_IP_BIND}
+rcon.port = ${HABBO_SERVER_RCON_PORT}
 
 [Mus]
-mus.bind = $HABBO_SERVER_MUS_IP_BIND
-mus.port = $HABBO_SERVER_MUS_PORT
+mus.bind = ${HABBO_SERVER_MUS_IP_BIND}
+mus.port = ${HABBO_SERVER_MUS_PORT}
 
 [Database]
-mysql.hostname = $HABBO_DATABASE_HOST
-mysql.port = $HABBO_DATABASE_PORT
-mysql.username = $HABBO_DATABASE_USERNAME
-mysql.password = $HABBO_DATABASE_PASSWORD
-mysql.database = $HABBO_DATABASE_NAME
+mysql.hostname = ${HABBO_DATABASE_HOST}
+mysql.port = ${HABBO_DATABASE_PORT}
+mysql.username = ${HABBO_DATABASE_USERNAME}
+mysql.password = ${HABBO_DATABASE_PASSWORD}
+mysql.database = ${HABBO_DATABASE_NAME}
 
 [Logging]
-log.received.packets = $HABBO_SERVER_LOG_RECEIVED_PACKETS
-log.sent.packets = $HABBO_SERVER_LOG_SENT_PACKETS
+log.received.packets = ${HABBO_SERVER_LOG_RECEIVED_PACKETS}
+log.sent.packets = ${HABBO_SERVER_LOG_SENT_PACKETS}
 
 [Console]
-debug = $HABBO_SERVER_DEBUG
+debug = ${HABBO_SERVER_DEBUG}
 EOF
 
 echo "[level:INFO][docker-habbo-server] Configuration file generated successfully"

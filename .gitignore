@@ -4,3 +4,15 @@
 /.idea/
 .vscode
 .DS_Store
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Docker compose override
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
